@@ -1,0 +1,16 @@
+# OpenAI Configuration
+OPENAI_API_KEY=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
+
+# Database Configuration
+DATABASE_URL="postgresql://postgres:password@localhost:5432/suss_ai_db?schema=public"
+
+# JWT Configuration
+JWT_SECRET=suss_ai_super_secret_jwt_key_2024_minimum_32_characters_long
+
+# Server Configuration  
+NODE_ENV=development
+PORT=3000
+LOG_LEVEL=info
+
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:8081 
