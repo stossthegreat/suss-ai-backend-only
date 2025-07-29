@@ -26,7 +26,7 @@ export class SussAIEngine {
       const prompt = GodPromptSystem.buildPrompt(request);
 
       // 🚀 Call OpenAI
-      const completion = await this.openai.getClient().chat.completions.create({
+      const completion = await this.openai.getOpenAIClient().chat.completions.create({
         model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,

@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 // 🛡️ Security middleware
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    origin: true, // Allow all origins for development
     credentials: true
 }));
 // 📝 Request parsing

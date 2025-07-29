@@ -7,9 +7,20 @@ exports.OpenAIConfig = void 0;
 const openai_1 = __importDefault(require("openai"));
 class OpenAIConfig {
     constructor() {
-        this.client = new openai_1.default({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        this.client = null;
+        // Don't initialize client here - do it lazily
+    }
+    getClient() {
+        if (!this.client) {
+            const apiKey = process.env.OPENAI_API_KEY;
+            if (!apiKey) {
+                throw new Error('OPENAI_API_KEY environment variable is required');
+            }
+            this.client = new openai_1.default({
+                apiKey: apiKey,
+            });
+        }
+        return this.client;
     }
     // 🧠 SMART MODEL ROUTING - Exactly as specified
     selectModel(request) {
@@ -26,8 +37,8 @@ class OpenAIConfig {
         // Use GPT-4 Mini for fast scans
         return 'gpt-4o-mini';
     }
-    getClient() {
-        return this.client;
+    getOpenAIClient() {
+        return this.getClient();
     }
 }
 exports.OpenAIConfig = OpenAIConfig;

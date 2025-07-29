@@ -2,12 +2,23 @@ import OpenAI from 'openai';
 import { AnalysisRequest } from '../types/analysis';
 
 export class OpenAIConfig {
-  private client: OpenAI;
+  private client: OpenAI | null = null;
 
   constructor() {
-    this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // Don't initialize client here - do it lazily
+  }
+
+  private getClient(): OpenAI {
+    if (!this.client) {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('OPENAI_API_KEY environment variable is required');
+      }
+      this.client = new OpenAI({
+        apiKey: apiKey,
+      });
+    }
+    return this.client;
   }
 
   // 🧠 SMART MODEL ROUTING - Exactly as specified
@@ -28,7 +39,7 @@ export class OpenAIConfig {
     return 'gpt-4o-mini';
   }
 
-  getClient(): OpenAI {
-    return this.client;
+  getOpenAIClient(): OpenAI {
+    return this.getClient();
   }
 } 
