@@ -45,6 +45,14 @@ Respond with ONLY this JSON structure:
 
 Analyze this message for signs of manipulation, emotional deflection, or dishonesty.
 Highlight any inconsistencies, over-explanations, or guilt masking. Do not soften truth unless tone is soft.
+
+SCORING GUIDELINES:
+- 0-20: Likely honest, clear communication
+- 21-40: Some suspicious elements, minor red flags
+- 41-60: Moderate deception indicators, mixed signals
+- 61-80: Strong deception patterns, major red flags
+- 81-100: High deception risk, clear manipulation
+
 Tone: ${request.tone}
 
 Message to analyze: "${inputText}"
