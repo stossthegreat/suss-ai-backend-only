@@ -8,6 +8,7 @@ const analysisRequestSchema = zod_1.z.object({
     analysis_goal: zod_1.z.enum(['subtext_scan', 'lie_detection', 'pattern_analysis']),
     tone: zod_1.z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty']),
     comeback_enabled: zod_1.z.boolean(),
+    relationship: zod_1.z.string().optional(),
 });
 const validateAnalysisRequest = (req, res, next) => {
     try {

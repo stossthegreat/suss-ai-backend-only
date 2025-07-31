@@ -3,6 +3,7 @@ import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../utils/mock_data.dart';
 import '../../models/analysis_result.dart';
+import '../../services/api_service.dart';
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
 import '../common/outlined_button.dart';
@@ -20,6 +21,7 @@ class ScanTab extends StatefulWidget {
 
 class _ScanTabState extends State<ScanTab> {
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _relationshipController = TextEditingController();
   String _selectedCategory = 'story';
   String _selectedTone = 'brutal';
   bool _isAnalyzing = false;
@@ -29,20 +31,54 @@ class _ScanTabState extends State<ScanTab> {
   Future<void> _runAnalysis() async {
     if (_textController.text.trim().isEmpty) return;
     
+    // Check if relationship is selected
+    if (_relationshipController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a relationship type'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
     setState(() {
       _isAnalyzing = true;
       _analysis = null;
       _showLieDetector = false;
     });
 
-    // Simulate analysis delay
-    await Future.delayed(AppConstants.analysisAnimation);
+    try {
+      // Call the AI service with relationship context
+      final result = await ApiService.analyzeMessage(
+        inputText: _textController.text.trim(),
+        contentType: _selectedCategory,
+        analysisGoal: 'lie_detection',
+        tone: _selectedTone,
+        comebackEnabled: true,
+        relationship: _relationshipController.text.trim(),
+      );
 
-    if (mounted) {
-      setState(() {
-        _analysis = MockData.getMockAnalysis(_selectedTone);
-        _isAnalyzing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _analysis = result;
+          _isAnalyzing = false;
+        });
+      }
+    } catch (error) {
+      print('❌ Scan analysis failed: $error');
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+        // Show error message to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Analysis failed: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -54,6 +90,10 @@ class _ScanTabState extends State<ScanTab> {
         children: [
           // Header
           _buildHeader(),
+          const SizedBox(height: 24),
+          
+          // Relationship Field
+          _buildRelationshipField(),
           const SizedBox(height: 24),
           
           // Input Section
@@ -97,7 +137,7 @@ class _ScanTabState extends State<ScanTab> {
             ShaderMask(
               shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
               child: const Text(
-                'Social Lie Detector',
+                'MySnitch AI',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -114,6 +154,83 @@ class _ScanTabState extends State<ScanTab> {
             color: AppColors.textGray400,
             fontSize: 14,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRelationshipField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'RELATIONSHIP',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: _relationshipController,
+                placeholder: 'e.g., Partner, Friend, Coworker, Ex...',
+                padding: const EdgeInsets.all(12),
+              ),
+            ),
+            const SizedBox(width: 8),
+            PopupMenuButton<String>(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundGray800,
+                  borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+                  border: Border.all(color: AppColors.borderGray600),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Presets',
+                      style: TextStyle(
+                        color: AppColors.textGray400,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: AppColors.textGray400,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+              itemBuilder: (context) => [
+                'Partner',
+                'Friend',
+                'Coworker',
+                'Family',
+                'Ex',
+                'Stranger',
+                'Date',
+                'Roommate',
+              ].map((relationship) => PopupMenuItem(
+                value: relationship,
+                child: Text(relationship),
+              )).toList(),
+              onSelected: (value) {
+                setState(() {
+                  _relationshipController.text = value;
+                });
+              },
+            ),
+          ],
         ),
       ],
     );

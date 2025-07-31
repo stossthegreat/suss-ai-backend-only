@@ -41,6 +41,10 @@ dependencies:
   
   # HTTP client for API calls
   http: ^1.1.0
+  
+  # State management and preferences
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

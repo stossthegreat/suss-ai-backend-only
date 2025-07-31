@@ -4,6 +4,7 @@ export interface AnalysisRequest {
   analysis_goal: 'subtext_scan' | 'lie_detection' | 'pattern_analysis';
   tone: 'brutal' | 'soft' | 'clinical' | 'playful' | 'petty';
   comeback_enabled: boolean;
+  relationship?: string;
 }
 
 export interface SubtextScanResponse {

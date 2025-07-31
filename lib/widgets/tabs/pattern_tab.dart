@@ -3,6 +3,8 @@ import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../utils/mock_data.dart';
 import '../../models/pattern_analysis.dart';
+import '../../models/analysis_result.dart';
+import '../../services/api_service.dart';
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
 import '../common/result_card.dart';
@@ -32,29 +34,60 @@ class _PatternTabState extends State<PatternTab> {
   Future<void> _analyzePattern() async {
     final validMessages = _messageControllers
         .where((controller) => controller.text.trim().isNotEmpty)
-        .length;
+        .toList();
     
-    if (validMessages < 2) return; // Need at least 2 messages like React
+    if (validMessages.length < 2) return;
 
     setState(() {
       _isAnalyzing = true;
       _patternAnalysis = null;
     });
 
-    // ✅ REUSED: AppConstants.patternAnalysisAnimation (3200ms - longer than scan)
-    await Future.delayed(AppConstants.patternAnalysisAnimation);
+    try {
+      final result = await ApiService.analyzeMessage(
+        inputText: validMessages.map((controller) => controller.text.trim()).join('\n'),
+        contentType: 'post',
+        analysisGoal: 'pattern_analysis',
+        tone: 'brutal',
+        comebackEnabled: false,
+      );
 
-    if (mounted) {
-      setState(() {
-        // ✅ REUSED: MockData.getMockPatternAnalysis() with exact React data
-        _patternAnalysis = MockData.getMockPatternAnalysis();
-        _isAnalyzing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _patternAnalysis = PatternAnalysis(
+            compositeRedFlagScore: result.redFlag,
+            dominantMotive: result.subtext,
+            patternType: result.pattern,
+            emotionalSummary: result.feeling,
+            lieDetector: LieDetectorResult(
+              isHonest: result.redFlag < 50,
+              verdict: result.redFlag < 50 ? 'Likely Honest Pattern' : 'Likely Dishonest Pattern',
+              cues: [result.subtext],
+              gutCheck: result.headline,
+            ),
+          );
+          _isAnalyzing = false;
+        });
+      }
+    } catch (error) {
+      print('❌ Pattern analysis failed: $error');
+      if (mounted) {
+        setState(() {
+          _isAnalyzing = false;
+        });
+        // Show error message to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Pattern analysis failed: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   void _addMessage() {
-    if (_messageControllers.length < 7) { // Max 7 messages like React
+    if (_messageControllers.length < 5) { // Max 5 messages as requested
       setState(() {
         _messageControllers.add(TextEditingController());
       });
@@ -156,7 +189,7 @@ class _PatternTabState extends State<PatternTab> {
       children: [
         // ✅ EXACT React: Counter showing valid messages
         Text(
-          'MESSAGES ($_validMessageCount/7)',
+          'MESSAGES ($_validMessageCount/5)',
           style: TextStyle(
             color: AppColors.textGray400,
             fontSize: 12,
@@ -206,8 +239,8 @@ class _PatternTabState extends State<PatternTab> {
           );
         }),
         
-        // ✅ EXACT React: Dashed "Add Message" button (only if < 7 messages)
-        if (_messageControllers.length < 7)
+        // ✅ EXACT React: Dashed "Add Message" button (only if < 5 messages)
+        if (_messageControllers.length < 5)
           GestureDetector(
             onTap: _addMessage,
             child: Container(

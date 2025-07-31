@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
-import 'utils/colors.dart';
 
 void main() {
   runApp(const SocialLieDetectorApp());
@@ -12,23 +10,13 @@ class SocialLieDetectorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Set status bar style
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFF111827),
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-    );
-
     return MaterialApp(
-      title: 'Social Lie Detector',
+      title: 'MySnitch AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.black,
-        fontFamily: 'Inter', // You'll need to add this font to pubspec.yaml
+        fontFamily: 'Inter',
         textTheme: const TextTheme(
           displayLarge: TextStyle(color: Colors.white),
           displayMedium: TextStyle(color: Colors.white),
@@ -47,10 +35,8 @@ class SocialLieDetectorApp extends StatelessWidget {
           labelSmall: TextStyle(color: Colors.white),
         ),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primaryPink,
+          seedColor: const Color(0xFFEC4899),
           brightness: Brightness.dark,
-          surface: const Color(0xFF111827),
-          onSurface: Colors.white,
         ),
       ),
       home: const HomeScreen(),

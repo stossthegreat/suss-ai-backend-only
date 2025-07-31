@@ -8,6 +8,7 @@ const analysisRequestSchema = z.object({
   analysis_goal: z.enum(['subtext_scan', 'lie_detection', 'pattern_analysis']),
   tone: z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty']),
   comeback_enabled: z.boolean(),
+  relationship: z.string().optional(),
 });
 
 export const validateAnalysisRequest = (req: Request, res: Response, next: NextFunction) => {

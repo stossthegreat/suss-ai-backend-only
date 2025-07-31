@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
+// import 'package:provider/provider.dart';
+// import '../../providers/theme_provider.dart';
+// import 'settings/theme_settings.dart';
+// import 'settings/account_settings.dart';
+// import 'settings/privacy_settings.dart';
+// import 'settings/premium_settings.dart';
+// import 'settings/notification_settings.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -32,6 +39,10 @@ class _SettingsTabState extends State<SettingsTab> {
           // Analysis Preferences - EXACTLY like React section
           _buildAnalysisPreferences(),
           const SizedBox(height: 32),
+          
+          // Theme Settings - Temporarily disabled
+          // _buildThemeSection(),
+          // const SizedBox(height: 24),
           
           // Account & Subscription - EXACTLY like React section
           _buildAccountSection(),
@@ -67,6 +78,45 @@ class _SettingsTabState extends State<SettingsTab> {
       ],
     );
   }
+
+  // ✅ THEME SETTINGS - New section for theme controls (temporarily disabled)
+  /*
+  Widget _buildThemeSection() {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader('APPEARANCE'),
+            const SizedBox(height: 16),
+            _buildActionCard(
+              title: 'Theme Settings',
+              subtitle: 'Customize light and dark mode',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ThemeSettings(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildSettingsCard(
+              title: 'Dark Mode',
+              subtitle: 'Switch between light and dark themes',
+              child: Switch(
+                value: themeProvider.isDarkMode,
+                onChanged: (value) => themeProvider.toggleTheme(),
+                activeColor: AppColors.primaryPink,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  */
 
   // ✅ ANALYSIS PREFERENCES - Matches React: First section with toggles
   Widget _buildAnalysisPreferences() {
@@ -150,50 +200,44 @@ class _SettingsTabState extends State<SettingsTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ EXACT React: Section header
         _buildSectionHeader('ACCOUNT & SUBSCRIPTION'),
         const SizedBox(height: 16),
         
-        // ✅ EXACT React: Subscription status card
-        _buildSettingsCard(
-          title: 'Subscription Status',
-          subtitle: 'Pro Plan - Active',
-          subtitleColor: AppColors.successGreen, // Green for active
-          child: TextButton(
-            onPressed: () {
-              // Navigate to subscription management
-            },
-            child: Text(
-              'Manage Plan',
-              style: TextStyle(
-                color: AppColors.primaryPurple,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        
-        // ✅ EXACT React: Account Settings clickable card
+        // Account Settings - EXACTLY like React
         _buildActionCard(
           title: 'Account Settings',
-          subtitle: 'Email, password, preferences',
+          subtitle: 'Manage your profile and preferences',
           onTap: () {
-            // Navigate to account settings
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Account settings coming soon!')),
+            );
           },
         ),
         const SizedBox(height: 12),
         
-        // ✅ EXACT React: Delete Account danger card (red)
+        // Premium Features - EXACTLY like React
         _buildActionCard(
-          title: 'Delete Account',
-          subtitle: 'Permanently delete your data',
-          titleColor: AppColors.dangerRed,
-          subtitleColor: AppColors.dangerRed.withOpacity(0.7),
-          backgroundColor: AppColors.dangerRed.withOpacity(0.1),
-          borderColor: AppColors.dangerRed.withOpacity(0.2),
+          title: 'Premium Features',
+          subtitle: 'Unlock advanced analysis tools',
           onTap: () {
-            // Show delete confirmation dialog
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Premium features coming soon!')),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        
+        // Notification Settings - EXACTLY like React
+        _buildActionCard(
+          title: 'Notification Settings',
+          subtitle: 'Configure push notifications',
+          onTap: () {
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Notification settings coming soon!')),
+            );
           },
         ),
       ],
@@ -205,43 +249,44 @@ class _SettingsTabState extends State<SettingsTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ EXACT React: Section header
         _buildSectionHeader('SUPPORT & LEGAL'),
         const SizedBox(height: 16),
         
-        // ✅ EXACT React: All support/legal action cards
-        _buildActionCard(
-          title: 'Contact Support',
-          subtitle: 'Get help with your account',
-          onTap: () {
-            // Open support contact
-          },
-        ),
-        const SizedBox(height: 12),
-        
-        _buildActionCard(
-          title: 'Report a Bug',
-          subtitle: 'Help us improve the app',
-          onTap: () {
-            // Open bug report form
-          },
-        ),
-        const SizedBox(height: 12),
-        
-        _buildActionCard(
-          title: 'Terms & Conditions',
-          subtitle: 'Legal terms of service',
-          onTap: () {
-            // Open terms page
-          },
-        ),
-        const SizedBox(height: 12),
-        
+        // Privacy Policy - EXACTLY like React
         _buildActionCard(
           title: 'Privacy Policy',
-          subtitle: 'How we protect your data',
+          subtitle: 'Read our privacy policy',
           onTap: () {
-            // Open privacy policy
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Privacy policy coming soon!')),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        
+        // Terms of Service - EXACTLY like React
+        _buildActionCard(
+          title: 'Terms of Service',
+          subtitle: 'Read our terms of service',
+          onTap: () {
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Terms of service coming soon!')),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        
+        // Contact Support - EXACTLY like React
+        _buildActionCard(
+          title: 'Contact Support',
+          subtitle: 'Get help from our team',
+          onTap: () {
+            // Temporarily disabled
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Contact support coming soon!')),
+            );
           },
         ),
       ],

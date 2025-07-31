@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../utils/mock_data.dart';
+import '../../services/api_service.dart';
 
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
@@ -23,12 +24,42 @@ class _ComebacksTabState extends State<ComebacksTab> {
   String _selectedTone = 'mature'; // Default to mature like React
   String _generatedComeback = '';
 
-  void _generateComeback() {
-    // ✅ REUSED: MockData.getMockComebacks() with exact React responses
-    final comebacks = MockData.getMockComebacks();
+  Future<void> _generateComeback() async {
+    if (_textController.text.trim().isEmpty) return;
+    
     setState(() {
-      _generatedComeback = comebacks[_selectedTone] ?? '';
+      _generatedComeback = 'Generating comeback...';
     });
+
+    try {
+      final result = await ApiService.analyzeMessage(
+        inputText: _textController.text.trim(),
+        contentType: 'post',
+        analysisGoal: 'lie_detection',
+        tone: _selectedTone,
+        comebackEnabled: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _generatedComeback = result.comeback ?? 'No comeback generated';
+        });
+      }
+    } catch (error) {
+      print('❌ Comeback generation failed: $error');
+      if (mounted) {
+        setState(() {
+          _generatedComeback = 'Failed to generate comeback. Please try again.';
+        });
+        // Show error message to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Comeback generation failed: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

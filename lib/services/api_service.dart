@@ -13,6 +13,7 @@ class ApiService {
     required String analysisGoal,
     required String tone,
     bool comebackEnabled = true,
+    String? relationship,
   }) async {
     print('🚀 ApiService: Making API call...');
     
@@ -22,12 +23,21 @@ class ApiService {
       
       request.headers.set('Content-Type', 'application/json');
       
+      // For pattern analysis, split the input text into an array of messages
+      dynamic inputData;
+      if (analysisGoal == 'pattern_analysis') {
+        inputData = inputText.split('\n').where((line) => line.trim().isNotEmpty).toList();
+      } else {
+        inputData = inputText;
+      }
+      
       final body = {
-        'input_text': inputText,
+        'input_text': inputData,
         'content_type': contentType,
         'analysis_goal': analysisGoal,
         'tone': tone,
-        'comeback_enabled': comebackEnabled
+        'comeback_enabled': comebackEnabled,
+        'relationship': relationship,
       };
       
       print('📤 ApiService: Sending request: ${jsonEncode(body)}');
