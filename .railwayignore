@@ -1,0 +1,23 @@
+# Ignore Flutter/Dart files
+ios/
+android/
+lib/
+pubspec.yaml
+pubspec.lock
+test/
+web/
+macos/
+linux/
+windows/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.dart
+
+# Ignore other unnecessary files
+.git/
+node_modules/
+*.log
+.env
+env 
