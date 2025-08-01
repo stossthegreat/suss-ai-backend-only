@@ -422,7 +422,7 @@ class _ScanTabState extends State<ScanTab> {
   Widget _buildScanButton() {
     // Check if both text and relationship are filled
     final hasText = _textController.text.trim().isNotEmpty;
-    final hasRelationship = _relationshipController.text.trim().isNotEmpty;
+    final hasRelationship = _selectedRelationship.isNotEmpty;
     final isReady = hasText && hasRelationship;
     
     return GradientButton(
