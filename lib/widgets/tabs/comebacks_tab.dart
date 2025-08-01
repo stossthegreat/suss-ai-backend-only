@@ -314,21 +314,63 @@ class _ComebacksTabState extends State<ComebacksTab> {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
+        // ✅ Use GridView for consistent sizing like tone selector
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2, // 2 columns for better layout
+          childAspectRatio: 2.8, // Consistent aspect ratio
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
           children: AppConstants.comebackStyles.map((style) {
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: CustomOutlinedButton(
-                  text: style.label,
-                  isSelected: _selectedStyle == style.id,
-                  selectedColor: AppColors.primaryPink,
-                  onPressed: () {
-                    setState(() {
-                      _selectedStyle = style.id;
-                    });
-                    _generateComeback(); // Auto-generate on selection
-                  },
+            return Container(
+              height: 80, // Fixed height for consistency
+              child: CustomOutlinedButton(
+                text: '',
+                isSelected: _selectedStyle == style.id,
+                selectedColor: AppColors.primaryPink,
+                onPressed: () {
+                  setState(() {
+                    _selectedStyle = style.id;
+                  });
+                  _generateComeback(); // Auto-generate on selection
+                },
+                child: Container(
+                  height: 80, // Fixed height
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Style label
+                      Text(
+                        style.label,
+                        style: TextStyle(
+                          color: _selectedStyle == style.id
+                              ? AppColors.primaryPink
+                              : AppColors.textGray400,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      // Style description
+                      Expanded(
+                        child: Text(
+                          style.desc,
+                          style: TextStyle(
+                            color: (_selectedStyle == style.id
+                                    ? AppColors.primaryPink
+                                    : AppColors.textGray400)
+                                .withOpacity(0.7),
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
