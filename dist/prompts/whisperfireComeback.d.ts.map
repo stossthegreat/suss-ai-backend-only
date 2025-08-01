@@ -1,1 +1,0 @@
-{"version":3,"file":"whisperfireComeback.d.ts","sourceRoot":"","sources":["../../src/prompts/whisperfireComeback.ts"],"names":[],"mappings":"AAGA,qBAAa,mBAAmB;IAG9B,OAAO,CAAC,MAAM,CAAC,QAAQ,CAAC,aAAa,CA8BrC;IAGA,MAAM,CAAC,mBAAmB,CACxB,SAAS,EAAE,MAAM,EACjB,IAAI,EAAE,MAAM,EACZ,YAAY,CAAC,EAAE,MAAM,GACpB,MAAM;IAsET,OAAO,CAAC,MAAM,CAAC,qBAAqB;IAuCpC,OAAO,CAAC,MAAM,CAAC,mBAAmB;CA6BnC"}
