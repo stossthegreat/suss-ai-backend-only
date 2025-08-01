@@ -49,8 +49,39 @@ export class SussAIEngine {
     const model = this.openai.selectModel(request);
     logger.info(`Using legacy model: ${model} for ${request.analysis_goal}`);
 
-    // 🔥 Build WHISPERFIRE prompt
-    const prompt = this.buildWhisperfirePrompt(request);
+    // 🔮 Build the God prompt
+    let prompt: string;
+    switch (request.analysis_goal) {
+      case "subtext_scan":
+        const inputText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
+        prompt = ScanInsightEngine.buildScanPrompt(
+          inputText,
+          request.content_type,
+          request.relationship || "Stranger",
+          request.tone
+        );
+        break;
+      case "lie_detection":
+        const comebackText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
+        prompt = ComebackViralWeapon.buildComebackPrompt(
+          comebackText,
+          request.tone,
+          request.relationship
+        );
+        break;
+      case "pattern_analysis":
+        if (!Array.isArray(request.input_text)) {
+          throw new Error("Pattern profiling requires an array of messages");
+        }
+        prompt = PatternProfilingWeapon.buildPatternPrompt(
+          request.input_text,
+          request.relationship || "Stranger",
+          request.tone,
+        );
+        break;
+      default:
+        throw new Error(`Unknown analysis goal: ${request.analysis_goal}`);
+    }
 
     // 🔍 Check cache for identical requests
     const requestHash = this.createRequestHash(request, prompt);
@@ -420,39 +451,6 @@ export class SussAIEngine {
   }
 
   private createRequestHash(request: AnalysisRequest | LegendaryAnalysisRequest, prompt: string): string {
-
-  private buildWhisperfirePrompt(request: AnalysisRequest): string {
-    switch (request.analysis_goal) {
-      case "instant_scan":
-        const inputText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
-        return ScanInsightEngine.buildScanPrompt(
-          inputText,
-          request.content_type,
-          request.relationship || "Stranger",
-          request.tone
-        );
-      case "comeback_generation":
-        const comebackText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
-        return ComebackViralWeapon.buildComebackPrompt(
-          comebackText,
-          request.content_type,
-          request.relationship || "Stranger",
-          request.tone,
-          request.comeback_tone || "mature",
-          request.comeback_style || "clipped"
-        );
-      case "pattern_profiling":
-        const patternText = Array.isArray(request.input_text) ? request.input_text.join("\n\n---\n\n") : request.input_text;
-        return PatternProfilingWeapon.buildPatternPrompt(
-          patternText,
-          request.content_type,
-          request.relationship || "Stranger",
-          request.tone
-        );
-      default:
-        throw new Error(`Unknown analysis goal: ${request.analysis_goal}`);
-    }
-  }
     const requestString = JSON.stringify({
       input_text: request.input_text,
       content_type: request.content_type,
