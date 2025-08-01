@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:html' as html;
 import '../models/analysis_result.dart';
 import '../models/pattern_analysis.dart';
 import '../models/history_item.dart';
 
 class AnalysisService {
-  // 🚀 CHANGE THIS TO YOUR RAILWAY URL WHEN DEPLOYED
-  static const String baseUrl = 'http://127.0.0.1:3000/api/v1';
-  // static const String baseUrl = 'https://your-app-name.railway.app/api/v1';
+  // 🚀 RAILWAY BACKEND URL
+  static const String baseUrl = 'https://suss-ai-backend-only-production-c323.up.railway.app/api/v1';
+  // static const String baseUrl = 'http://127.0.0.1:3000/api/v1'; // For local development
 
   // 🎯 ANALYZE MESSAGE - SIMPLIFIED VERSION
   static Future<AnalysisResult> analyzeMessage({
@@ -19,11 +19,6 @@ class AnalysisService {
     print('🚀 Making API call to analyze message...');
     
     try {
-      final client = HttpClient();
-      final request = await client.postUrl(Uri.parse('$baseUrl/analyze'));
-      
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = {
         'input_text': text,
         'content_type': _mapCategoryToContentType(category),
@@ -33,15 +28,20 @@ class AnalysisService {
       };
       
       print('📤 Sending request: ${jsonEncode(body)}');
-      request.write(jsonEncode(body));
       
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
+      final request = html.HttpRequest();
+      request.open('POST', '$baseUrl/analyze');
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('Accept', 'application/json');
       
-      print('📥 Received response: $responseBody');
+      request.send(jsonEncode(body));
+      await request.onLoad.first;
       
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(responseBody);
+      print('📥 Received response: ${request.responseText}');
+      print('📊 Status code: ${request.status}');
+      
+      if (request.status == 200) {
+        final jsonData = jsonDecode(request.responseText!);
         final data = jsonData['data'];
         
         // Map the API response to our Flutter model
@@ -59,7 +59,7 @@ class AnalysisService {
         print('✅ Successfully mapped API response');
         return AnalysisResult.fromMap(mappedData);
       } else {
-        throw Exception('API returned status code: ${response.statusCode}');
+        throw Exception('API returned status code: ${request.status}');
       }
       
     } catch (e) {
@@ -77,36 +77,45 @@ class AnalysisService {
     print('🚀 Making API call to analyze patterns...');
     
     try {
-      final client = HttpClient();
-      final request = await client.postUrl(Uri.parse('$baseUrl/analyze'));
-      
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = {
-        'input_text': messages.join('\n\n'),
+        'input_text': messages,
         'content_type': _mapCategoryToContentType(category),
         'analysis_goal': 'pattern_analysis',
         'tone': tone,
         'comeback_enabled': false
       };
       
-      request.write(jsonEncode(body));
+      print('📤 Sending pattern analysis request: ${jsonEncode(body)}');
       
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
+      final request = html.HttpRequest();
+      request.open('POST', '$baseUrl/analyze');
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('Accept', 'application/json');
       
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(responseBody);
+      request.send(jsonEncode(body));
+      await request.onLoad.first;
+      
+      print('📥 Received pattern response: ${request.responseText}');
+      print('📊 Status code: ${request.status}');
+      
+      if (request.status == 200) {
+        final jsonData = jsonDecode(request.responseText!);
         final data = jsonData['data'];
         
         return PatternAnalysis(
-          patternType: data['behavior_pattern'] ?? 'Unknown',
-          confidence: data['lie_risk_score']?.toDouble() ?? 0.0,
-          description: data['subtext_summary'] ?? 'No pattern detected',
-          recommendations: [data['suss_verdict'] ?? 'No recommendations'],
+          compositeRedFlagScore: data['lie_risk_score']?.toInt() ?? 0,
+          dominantMotive: data['behavior_pattern'] ?? 'Unknown',
+          patternType: data['pattern_detected'] ?? 'Unknown',
+          emotionalSummary: data['subtext_summary'] ?? 'No pattern detected',
+          lieDetector: LieDetectorResult(
+            verdict: data['suss_verdict'] ?? 'Pattern analysis complete',
+            isHonest: (data['lie_risk_score'] ?? 0) < 50,
+            cues: [data['pattern_summary'] ?? 'No cues detected'],
+            gutCheck: data['suss_verdict'] ?? 'Pattern analysis complete',
+          ),
         );
       } else {
-        throw Exception('API returned status code: ${response.statusCode}');
+        throw Exception('API returned status code: ${request.status}');
       }
       
     } catch (e) {
@@ -124,29 +133,32 @@ class AnalysisService {
     print('🚀 Making API call to generate comeback...');
     
     try {
-      final client = HttpClient();
-      final request = await client.postUrl(Uri.parse('$baseUrl/analyze'));
-      
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = {
         'input_text': originalMessage,
         'content_type': 'dm',
-        'analysis_goal': 'comeback_generation',
+        'analysis_goal': 'lie_detection',
         'tone': tone,
         'comeback_enabled': true
       };
       
-      request.write(jsonEncode(body));
+      print('📤 Sending comeback request: ${jsonEncode(body)}');
       
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
+      final request = html.HttpRequest();
+      request.open('POST', '$baseUrl/analyze');
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('Accept', 'application/json');
       
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(responseBody);
+      request.send(jsonEncode(body));
+      await request.onLoad.first;
+      
+      print('📥 Received comeback response: ${request.responseText}');
+      print('📊 Status code: ${request.status}');
+      
+      if (request.status == 200) {
+        final jsonData = jsonDecode(request.responseText!);
         return jsonData['data']['comeback'] ?? 'No comeback generated';
       } else {
-        throw Exception('API returned status code: ${response.statusCode}');
+        throw Exception('API returned status code: ${request.status}');
       }
       
     } catch (e) {

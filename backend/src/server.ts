@@ -38,9 +38,18 @@ app.use('/api/v1', analysisRouter);
 app.get('/', (req, res) => {
   res.json({
     name: 'SUSS AI Backend',
-    version: '1.0.0',
-    status: 'The most dangerous AI scanner ever built 🔥',
-    docs: '/api/v1/health'
+    version: '2.0.0',
+    status: 'WHISPERFIRE: The most dangerous AI scanner ever built 🔥',
+    systems: {
+      legacy: 'active',
+      whisperfire: 'active'
+    },
+    docs: '/api/v1/health',
+    features: {
+      instant_scan: 'WHISPERFIRE psychological radar',
+      comeback_generation: 'COMEBACK.GPT viral weapon',
+      pattern_profiling: 'PATTERN.AI behavioral profiler'
+    }
   });
 });
 
@@ -57,5 +66,8 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 app.listen(PORT, () => {
   logger.info(`🔥 SUSS AI Backend running on port ${PORT}`);
   logger.info(`🧠 OpenAI integration ready`);
-  logger.info(`🎯 God prompt system loaded`);
+  logger.info(`🎯 Legacy God prompt system loaded`);
+  logger.info(`🚀 WHISPERFIRE system active`);
+  logger.info(`🗡️ COMEBACK.GPT viral weapon ready`);
+  logger.info(`🧠 PATTERN.AI behavioral profiler active`);
 }); 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../utils/mock_data.dart';
@@ -167,6 +168,27 @@ class _HistoryTabState extends State<HistoryTab> with TickerProviderStateMixin {
                 ),
               ),
               const SizedBox(width: 12),
+              // Copy button
+              GestureDetector(
+                onTap: () => _copyToClipboard(item.preview),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPink.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.primaryPink.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.copy,
+                    color: AppColors.primaryPink,
+                    size: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
               // Timestamp in top-right
               Text(
                 item.date,
@@ -218,6 +240,21 @@ class _HistoryTabState extends State<HistoryTab> with TickerProviderStateMixin {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  // ✅ Copy to clipboard functionality
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Message copied to clipboard!'),
+        backgroundColor: AppColors.primaryPink,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+        ),
       ),
     );
   }

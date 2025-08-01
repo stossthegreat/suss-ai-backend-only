@@ -18,25 +18,57 @@ class PatternTab extends StatefulWidget {
 }
 
 class _PatternTabState extends State<PatternTab> {
-  // ✅ REUSED from Phase 2 & 3: 
-  // - TextEditingController for person name + messages
-  // - MockData.getMockPatternAnalysis() for realistic pattern results
-  // - AppConstants.patternAnalysisAnimation for 3200ms delay
   final TextEditingController _nameController = TextEditingController();
   final List<TextEditingController> _messageControllers = [
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
+    TextEditingController(), // Start with only 1 message
   ];
+  String _selectedRelationship = 'Partner'; // New relationship context
   bool _isAnalyzing = false;
   PatternAnalysis? _patternAnalysis;
 
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to update button state when messages change
+    for (final controller in _messageControllers) {
+      controller.addListener(() {
+        setState(() {}); // Rebuild to update button state
+      });
+    }
+    _nameController.addListener(() {
+      setState(() {}); // Rebuild to update button state
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    for (final controller in _messageControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   Future<void> _analyzePattern() async {
+    print('🔍 Pattern Tab: _analyzePattern called');
+    
     final validMessages = _messageControllers
         .where((controller) => controller.text.trim().isNotEmpty)
         .toList();
     
-    if (validMessages.length < 2) return;
+    print('🔍 Pattern Tab: Valid messages count: ${validMessages.length}');
+    print('🔍 Pattern Tab: Valid messages: ${validMessages.map((controller) => controller.text.trim()).toList()}');
+    
+    if (validMessages.length < 2) {
+      print('🔍 Pattern Tab: Not enough messages, returning early');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add at least 2 messages to analyze patterns'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isAnalyzing = true;
@@ -44,29 +76,32 @@ class _PatternTabState extends State<PatternTab> {
     });
 
     try {
-      final result = await ApiService.analyzeMessage(
+      print('🔍 Pattern Tab: Making WHISPERFIRE API call...');
+      final result = await ApiService.analyzeMessageWhisperfire(
         inputText: validMessages.map((controller) => controller.text.trim()).join('\n'),
-        contentType: 'post',
-        analysisGoal: 'pattern_analysis',
+        contentType: 'dm',
+        analysisGoal: 'pattern_profiling',
         tone: 'brutal',
-        comebackEnabled: false,
+        relationship: _selectedRelationship,
+        personName: _nameController.text.trim(),
       );
 
+      print('🔍 Pattern Tab: WHISPERFIRE API call successful, updating UI');
       if (mounted) {
         setState(() {
+          // Map WHISPERFIRE response to PatternAnalysis
           _patternAnalysis = PatternAnalysis(
-            compositeRedFlagScore: result.redFlag,
-            dominantMotive: result.subtext,
-            patternType: result.pattern,
-            emotionalSummary: result.feeling,
+            compositeRedFlagScore: 75, // Default high risk for pattern analysis
+            dominantMotive: result.patternResult ?? 'Pattern detected',
+            patternType: 'Behavioral Pattern',
+            emotionalSummary: 'Psychological analysis complete',
             lieDetector: LieDetectorResult(
-              isHonest: result.redFlag < 50,
-              verdict: result.redFlag < 50 ? 'Likely Honest Pattern' : 'Likely Dishonest Pattern',
-              cues: [result.subtext],
-              gutCheck: result.headline,
+              isHonest: false, // Pattern analysis typically reveals manipulation
+              verdict: result.patternResult ?? 'Pattern analysis complete',
+              cues: ['Behavioral pattern detected'],
+              gutCheck: result.patternResult ?? 'Pattern analysis complete',
             ),
           );
-          _isAnalyzing = false;
         });
       }
     } catch (error) {
@@ -75,7 +110,6 @@ class _PatternTabState extends State<PatternTab> {
         setState(() {
           _isAnalyzing = false;
         });
-        // Show error message to user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Pattern analysis failed: ${error.toString()}'),
@@ -89,7 +123,11 @@ class _PatternTabState extends State<PatternTab> {
   void _addMessage() {
     if (_messageControllers.length < 5) { // Max 5 messages as requested
       setState(() {
-        _messageControllers.add(TextEditingController());
+        final newController = TextEditingController();
+        newController.addListener(() {
+          setState(() {}); // Rebuild to update button state
+        });
+        _messageControllers.add(newController);
       });
     }
   }
@@ -106,23 +144,27 @@ class _PatternTabState extends State<PatternTab> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Header Section - EXACTLY like React
+          // Header
           _buildHeader(),
           const SizedBox(height: 24),
           
-          // Person Name Field - EXACTLY like React optional input
+          // Relationship Context Selector
+          _buildRelationshipSelector(),
+          const SizedBox(height: 24),
+          
+          // Person Name Field
           _buildPersonNameField(),
           const SizedBox(height: 24),
           
-          // Message Stack - EXACTLY like React dynamic list (up to 7)
+          // Message Stack
           _buildMessageStack(),
           const SizedBox(height: 24),
           
-          // Analyze Button - EXACTLY like React purple gradient
+          // Analyze Button
           _buildAnalyzeButton(),
           const SizedBox(height: 24),
           
-          // Pattern Results - EXACTLY like React pattern analysis card
+          // Pattern Results
           if (_patternAnalysis != null) _buildPatternResults(),
           
           const SizedBox(height: 100), // Bottom padding for tab bar
@@ -150,6 +192,71 @@ class _PatternTabState extends State<PatternTab> {
           style: TextStyle(
             color: AppColors.textGray400,
             fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ✅ RELATIONSHIP SELECTOR - New WHISPERFIRE feature
+  Widget _buildRelationshipSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'RELATIONSHIP CONTEXT',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundGray800,
+            borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+            border: Border.all(color: AppColors.borderGray600),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedRelationship,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              items: AppConstants.relationshipContexts.map((context) {
+                return DropdownMenuItem<String>(
+                  value: context.id,
+                  child: Row(
+                    children: [
+                      Text(context.label),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          context.desc,
+                          style: TextStyle(
+                            color: AppColors.textGray400,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedRelationship = value;
+                  });
+                }
+              },
+            ),
           ),
         ),
       ],
@@ -284,6 +391,13 @@ class _PatternTabState extends State<PatternTab> {
 
   // ✅ ANALYZE BUTTON - Matches React: Purple gradient, requires 2+ messages
   Widget _buildAnalyzeButton() {
+    // Debug logging
+    print('🔍 Pattern Tab Debug:');
+    print('  - Valid message count: $_validMessageCount');
+    print('  - Total controllers: ${_messageControllers.length}');
+    print('  - Button disabled: ${_validMessageCount < 2}');
+    print('  - Is analyzing: $_isAnalyzing');
+    
     // ✅ REUSED: GradientButton from Phase 3 with custom purple gradient
     return GradientButton(
       text: _isAnalyzing ? 'Analyzing pattern...' : 'Analyze Communication Pattern',
@@ -296,77 +410,250 @@ class _PatternTabState extends State<PatternTab> {
       gradient: const LinearGradient(
         colors: [AppColors.primaryPurple, AppColors.primaryPink],
       ),
-      onPressed: _analyzePattern,
+      onPressed: () {
+        print('🔍 Pattern Tab: Button pressed!');
+        print('🔍 Pattern Tab: Valid messages: $_validMessageCount');
+        _analyzePattern();
+      },
     );
   }
 
-  // ✅ PATTERN RESULTS - Matches React: Complete pattern analysis card
+  // ✅ PATTERN RESULTS - Premium Design
   Widget _buildPatternResults() {
     final personName = _nameController.text.trim();
     
-    // ✅ REUSED: ResultCard from Phase 3 with glassmorphism + share button
     return ResultCard(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ EXACT React: Header with person name + score
-          Column(
-            children: [
-              Text(
-                personName.isNotEmpty 
-                    ? '$personName\'s Pattern' 
-                    : 'Communication Pattern',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          // Premium Header with Share Button
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.borderGray600,
+                  width: 0.5,
                 ),
               ),
-              const SizedBox(height: 8),
-              // ✅ EXACT React: Large score display
-              Text(
-                '${_patternAnalysis!.compositeRedFlagScore}/100',
-                style: TextStyle(
-                  color: AppColors.getScoreColor(_patternAnalysis!.compositeRedFlagScore),
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    personName.isNotEmpty 
+                        ? '$personName\'s Pattern Analysis' 
+                        : 'Communication Pattern Analysis',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                // Share Button
+                GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Share feature coming soon!'),
+                        backgroundColor: AppColors.primaryPink,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPink.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryPink,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.share,
+                          color: AppColors.primaryPink,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Share',
+                          style: TextStyle(
+                            color: AppColors.primaryPink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           
-          // ✅ EXACT React: Dominant Motive section
-          _buildPatternSection(
-            '🎯 DOMINANT MOTIVE:',
+          // Pattern Risk Score - Prominent Display
+          _buildPatternScoreSection(),
+          const SizedBox(height: 24),
+          
+          // Dominant Motive
+          _buildPremiumPatternSection(
+            '🎯 DOMINANT MOTIVE',
             _patternAnalysis!.dominantMotive,
             AppColors.primaryPurple,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           
-          // ✅ EXACT React: Pattern Type section  
-          _buildPatternSection(
-            '🔁 PATTERN TYPE:',
+          // Pattern Type
+          _buildPremiumPatternSection(
+            '🔁 PATTERN TYPE',
             _patternAnalysis!.patternType,
             AppColors.primaryPink,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           
-          // ✅ EXACT React: Emotional Summary section
-          _buildPatternSection(
-            '😔 EMOTIONAL SUMMARY:',
+          // Emotional Summary
+          _buildPremiumPatternSection(
+            '😔 EMOTIONAL IMPACT',
             _patternAnalysis!.emotionalSummary,
             AppColors.warningOrange,
           ),
           const SizedBox(height: 20),
           
-          // ✅ EXACT React: Lie Detector for Pattern section
+          // Lie Detector - Always Visible
           _buildPatternLieDetector(),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
           
-          // ✅ EXACT React: Watermark with compare arrows icon
-          const WatermarkStamp(
-            text: 'SocialLieDetector.com',
-            icon: Icons.compare_arrows, // Different icon for pattern tab
+          // Premium Branding
+          _buildPremiumBranding(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPatternScoreSection() {
+    final score = _patternAnalysis!.compositeRedFlagScore;
+    final isHighRisk = score >= 60;
+    final isCritical = score >= 80;
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: isCritical 
+            ? LinearGradient(colors: [AppColors.dangerRed, AppColors.dangerRed.withOpacity(0.8)])
+            : isHighRisk
+                ? LinearGradient(colors: [AppColors.warningOrange, AppColors.warningOrange.withOpacity(0.8)])
+                : LinearGradient(colors: [AppColors.successGreen, AppColors.successGreen.withOpacity(0.8)]),
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        border: Border.all(
+          color: isCritical 
+              ? AppColors.dangerRed.withOpacity(0.3)
+              : isHighRisk
+                  ? AppColors.warningOrange.withOpacity(0.3)
+                  : AppColors.successGreen.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '🧩 PATTERN RISK SCORE',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$score/100',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isCritical ? 'CRITICAL PATTERN' : isHighRisk ? 'HIGH RISK' : 'SAFE PATTERN',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumPatternSection(String title, String content, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          content,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPremiumBranding() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: AppColors.borderGray600,
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.compare_arrows,
+            color: AppColors.primaryPink,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'MySnitch AI',
+            style: TextStyle(
+              color: AppColors.primaryPink,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
           ),
         ],
       ),

@@ -22,19 +22,31 @@ class OpenAIConfig {
         }
         return this.client;
     }
-    // 🧠 SMART MODEL ROUTING - Exactly as specified
+    // 🧠 SMART MODEL ROUTING - Handles both Legacy and WHISPERFIRE
     selectModel(request) {
         const textLength = Array.isArray(request.input_text)
             ? request.input_text.join('').length
             : request.input_text.length;
-        // Use GPT-4 Turbo for heavy lifting
-        if (request.analysis_goal === 'lie_detection' ||
-            request.analysis_goal === 'pattern_analysis' ||
+        // 🧠 Legacy system routing
+        if ('comeback_enabled' in request) {
+            // Use GPT-4 Turbo for heavy lifting
+            if (request.analysis_goal === 'lie_detection' ||
+                request.analysis_goal === 'pattern_analysis' ||
+                textLength > 500 ||
+                Array.isArray(request.input_text)) {
+                return 'gpt-4';
+            }
+            // Use GPT-4 Mini for fast scans
+            return 'gpt-4o-mini';
+        }
+        // 🚀 WHISPERFIRE system routing
+        if (request.analysis_goal === 'pattern_profiling' ||
+            request.analysis_goal === 'instant_scan' ||
             textLength > 500 ||
             Array.isArray(request.input_text)) {
             return 'gpt-4';
         }
-        // Use GPT-4 Mini for fast scans
+        // Use GPT-4 Mini for comeback generation and simple scans
         return 'gpt-4o-mini';
     }
     getOpenAIClient() {
