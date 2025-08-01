@@ -1,5 +1,4 @@
 import { OpenAIConfig } from '../config/openai';
-import { GodPromptSystem } from '../prompts/godPrompt';
 import { ScanInsightEngine } from '../prompts/whisperfireScan';
 import { ComebackViralWeapon } from '../prompts/whisperfireComeback';
 import { PatternProfilingWeapon } from '../prompts/whisperfirePattern';
@@ -50,8 +49,8 @@ export class SussAIEngine {
     const model = this.openai.selectModel(request);
     logger.info(`Using legacy model: ${model} for ${request.analysis_goal}`);
 
-    // 🔮 Build the God prompt
-    const prompt = GodPromptSystem.buildPrompt(request);
+    // 🔥 Build WHISPERFIRE prompt
+    const prompt = this.buildWhisperfirePrompt(request);
 
     // 🔍 Check cache for identical requests
     const requestHash = this.createRequestHash(request, prompt);
@@ -421,6 +420,39 @@ export class SussAIEngine {
   }
 
   private createRequestHash(request: AnalysisRequest | LegendaryAnalysisRequest, prompt: string): string {
+
+  private buildWhisperfirePrompt(request: AnalysisRequest): string {
+    switch (request.analysis_goal) {
+      case "instant_scan":
+        const inputText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
+        return ScanInsightEngine.buildScanPrompt(
+          inputText,
+          request.content_type,
+          request.relationship || "Stranger",
+          request.tone
+        );
+      case "comeback_generation":
+        const comebackText = Array.isArray(request.input_text) ? request.input_text[0] : request.input_text;
+        return ComebackViralWeapon.buildComebackPrompt(
+          comebackText,
+          request.content_type,
+          request.relationship || "Stranger",
+          request.tone,
+          request.comeback_tone || "mature",
+          request.comeback_style || "clipped"
+        );
+      case "pattern_profiling":
+        const patternText = Array.isArray(request.input_text) ? request.input_text.join("\n\n---\n\n") : request.input_text;
+        return PatternProfilingWeapon.buildPatternPrompt(
+          patternText,
+          request.content_type,
+          request.relationship || "Stranger",
+          request.tone
+        );
+      default:
+        throw new Error(`Unknown analysis goal: ${request.analysis_goal}`);
+    }
+  }
     const requestString = JSON.stringify({
       input_text: request.input_text,
       content_type: request.content_type,
