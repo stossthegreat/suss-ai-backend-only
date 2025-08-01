@@ -167,53 +167,64 @@ class _ComebacksTabState extends State<ComebacksTab> {
           ),
         ),
         const SizedBox(height: 12),
-        // ✅ EXACT React layout: 2x2 grid (not 4x1 like categories)
+        // ✅ EXACT React layout: 2x2 grid with consistent sizing
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2, // 2 columns like React
-          childAspectRatio: 2.5, // Makes buttons wider for text
+          childAspectRatio: 2.8, // Consistent aspect ratio
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           children: AppConstants.comebackTones.map((tone) {
-            return CustomOutlinedButton(
-              text: '',
-              isSelected: _selectedTone == tone.id,
-              selectedColor: AppColors.primaryPink, // Pink selection like React
-              onPressed: () {
-                setState(() {
-                  _selectedTone = tone.id;
-                });
-                _generateComeback(); // Auto-generate on selection
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // ✅ EXACT React: emoji + label on top
-                  Text(
-                    tone.label, // "🧠 Mature", "🔥 Savage", etc.
-                    style: TextStyle(
-                      color: _selectedTone == tone.id
-                          ? AppColors.primaryPink
-                          : AppColors.textGray400,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  // ✅ EXACT React: description on bottom
-                  Text(
-                    tone.desc, // "Emotionally intelligent", "No mercy", etc.
-                    style: TextStyle(
-                      color: (_selectedTone == tone.id
+            return Container(
+              height: 80, // Fixed height for consistency
+              child: CustomOutlinedButton(
+                text: '',
+                isSelected: _selectedTone == tone.id,
+                selectedColor: AppColors.primaryPink, // Pink selection like React
+                onPressed: () {
+                  setState(() {
+                    _selectedTone = tone.id;
+                  });
+                  _generateComeback(); // Auto-generate on selection
+                },
+                child: Container(
+                  height: 80, // Fixed height
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // ✅ EXACT React: emoji + label on top
+                      Text(
+                        tone.label, // "🧠 Mature", "🔥 Savage", etc.
+                        style: TextStyle(
+                          color: _selectedTone == tone.id
                               ? AppColors.primaryPink
-                              : AppColors.textGray400)
-                          .withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
+                              : AppColors.textGray400,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      // ✅ EXACT React: description on bottom
+                      Expanded(
+                        child: Text(
+                          tone.desc, // "Emotionally intelligent", "No mercy", etc.
+                          style: TextStyle(
+                            color: (_selectedTone == tone.id
+                                    ? AppColors.primaryPink
+                                    : AppColors.textGray400)
+                                .withOpacity(0.7),
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           }).toList(),

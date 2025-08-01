@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
 import '../../utils/mock_data.dart';
-import '../../models/pattern_analysis.dart';
-import '../../models/analysis_result.dart';
-import '../../services/api_service.dart';
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
+import '../common/outlined_button.dart';
 import '../common/result_card.dart';
+import '../common/loading_spinner.dart';
 import '../common/watermark_stamp.dart';
+import '../../services/api_service.dart';
+import '../../models/whisperfire_models.dart';
+import 'package:flutter/services.dart';
 
 class PatternTab extends StatefulWidget {
   const PatternTab({super.key});
@@ -18,24 +20,17 @@ class PatternTab extends StatefulWidget {
 }
 
 class _PatternTabState extends State<PatternTab> {
+  final List<TextEditingController> _messageControllers = [TextEditingController()];
+  String _selectedRelationship = 'Partner';
   final TextEditingController _nameController = TextEditingController();
-  final List<TextEditingController> _messageControllers = [
-    TextEditingController(), // Start with only 1 message
-  ];
-  String _selectedRelationship = 'Partner'; // New relationship context
   bool _isAnalyzing = false;
-  PatternAnalysis? _patternAnalysis;
+  WhisperfireResponse? _analysis;
 
   @override
   void initState() {
     super.initState();
-    // Add listeners to update button state when messages change
-    for (final controller in _messageControllers) {
-      controller.addListener(() {
-        setState(() {}); // Rebuild to update button state
-      });
-    }
-    _nameController.addListener(() {
+    // Add listener to first controller
+    _messageControllers[0].addListener(() {
       setState(() {}); // Rebuild to update button state
     });
   }
@@ -49,59 +44,34 @@ class _PatternTabState extends State<PatternTab> {
     super.dispose();
   }
 
-  Future<void> _analyzePattern() async {
-    print('🔍 Pattern Tab: _analyzePattern called');
-    
-    final validMessages = _messageControllers
-        .where((controller) => controller.text.trim().isNotEmpty)
+  Future<void> _runPatternAnalysis() async {
+    // Get all valid messages
+    final messages = _messageControllers
+        .map((controller) => controller.text.trim())
+        .where((text) => text.isNotEmpty)
         .toList();
-    
-    print('🔍 Pattern Tab: Valid messages count: ${validMessages.length}');
-    print('🔍 Pattern Tab: Valid messages: ${validMessages.map((controller) => controller.text.trim()).toList()}');
-    
-    if (validMessages.length < 2) {
-      print('🔍 Pattern Tab: Not enough messages, returning early');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least 2 messages to analyze patterns'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+
+    if (messages.isEmpty) return;
 
     setState(() {
       _isAnalyzing = true;
-      _patternAnalysis = null;
+      _analysis = null;
     });
 
     try {
-      print('🔍 Pattern Tab: Making WHISPERFIRE API call...');
+      // Call the WHISPERFIRE API service for pattern analysis
       final result = await ApiService.analyzeMessageWhisperfire(
-        inputText: validMessages.map((controller) => controller.text.trim()).join('\n'),
+        inputText: messages.join('\n'),
         contentType: 'dm',
         analysisGoal: 'pattern_profiling',
-        tone: 'brutal',
+        tone: 'clinical',
         relationship: _selectedRelationship,
-        personName: _nameController.text.trim(),
       );
 
-      print('🔍 Pattern Tab: WHISPERFIRE API call successful, updating UI');
       if (mounted) {
         setState(() {
-          // Map WHISPERFIRE response to PatternAnalysis
-          _patternAnalysis = PatternAnalysis(
-            compositeRedFlagScore: 75, // Default high risk for pattern analysis
-            dominantMotive: result.patternResult?.behavioralProfile.headline ?? 'Pattern detected',
-            patternType: 'Behavioral Pattern',
-            emotionalSummary: 'Psychological analysis complete',
-            lieDetector: LieDetectorResult(
-              isHonest: false, // Pattern analysis typically reveals manipulation
-              verdict: result.patternResult?.viralInsights.sussVerdict ?? 'Pattern analysis complete',
-              cues: ['Behavioral pattern detected'],
-              gutCheck: result.patternResult?.viralInsights.gutValidation ?? 'Pattern analysis complete',
-            ),
-          );
+          _analysis = result;
+          _isAnalyzing = false;
         });
       }
     } catch (error) {
@@ -152,10 +122,6 @@ class _PatternTabState extends State<PatternTab> {
           _buildRelationshipSelector(),
           const SizedBox(height: 24),
           
-          // Person Name Field
-          _buildPersonNameField(),
-          const SizedBox(height: 24),
-          
           // Message Stack
           _buildMessageStack(),
           const SizedBox(height: 24),
@@ -165,7 +131,7 @@ class _PatternTabState extends State<PatternTab> {
           const SizedBox(height: 24),
           
           // Pattern Results
-          if (_patternAnalysis != null) _buildPatternResults(),
+          if (_analysis != null) _buildPatternResults(),
           
           const SizedBox(height: 100), // Bottom padding for tab bar
         ],
@@ -413,15 +379,13 @@ class _PatternTabState extends State<PatternTab> {
       onPressed: () {
         print('🔍 Pattern Tab: Button pressed!');
         print('🔍 Pattern Tab: Valid messages: $_validMessageCount');
-        _analyzePattern();
+        _runPatternAnalysis();
       },
     );
   }
 
   // ✅ PATTERN RESULTS - Premium Design
   Widget _buildPatternResults() {
-    final personName = _nameController.text.trim();
-    
     return ResultCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,9 +406,7 @@ class _PatternTabState extends State<PatternTab> {
               children: [
                 Expanded(
                   child: Text(
-                    personName.isNotEmpty 
-                        ? '$personName\'s Pattern Analysis' 
-                        : 'Communication Pattern Analysis',
+                    'Communication Pattern Analysis',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -504,33 +466,21 @@ class _PatternTabState extends State<PatternTab> {
           _buildPatternScoreSection(),
           const SizedBox(height: 24),
           
-          // Dominant Motive
+          // Viral Insights
           _buildPremiumPatternSection(
-            '🎯 DOMINANT MOTIVE',
-            _patternAnalysis!.dominantMotive,
-            AppColors.primaryPurple,
+            '🔥 VIRAL INSIGHTS',
+            _analysis!.patternResult!.viralInsights.sussVerdict,
+            AppColors.primaryCyan,
           ),
           const SizedBox(height: 16),
           
-          // Pattern Type
+          // Life Saving Insight
           _buildPremiumPatternSection(
-            '🔁 PATTERN TYPE',
-            _patternAnalysis!.patternType,
-            AppColors.primaryPink,
-          ),
-          const SizedBox(height: 16),
-          
-          // Emotional Summary
-          _buildPremiumPatternSection(
-            '😔 EMOTIONAL IMPACT',
-            _patternAnalysis!.emotionalSummary,
-            AppColors.warningOrange,
+            '💡 LIFE SAVING INSIGHT',
+            _analysis!.patternResult!.viralInsights.lifeSavingInsight,
+            AppColors.successGreen,
           ),
           const SizedBox(height: 20),
-          
-          // Lie Detector - Always Visible
-          _buildPatternLieDetector(),
-          const SizedBox(height: 24),
           
           // Premium Branding
           _buildPremiumBranding(),
@@ -540,7 +490,7 @@ class _PatternTabState extends State<PatternTab> {
   }
 
   Widget _buildPatternScoreSection() {
-    final score = _patternAnalysis!.compositeRedFlagScore;
+    final score = _analysis!.patternResult!.patternAnalysis.patternSeverityScore;
     final isHighRisk = score >= 60;
     final isCritical = score >= 80;
     
@@ -684,96 +634,6 @@ class _PatternTabState extends State<PatternTab> {
           ),
         ),
       ],
-    );
-  }
-
-  // ✅ EXACT React: Lie Detector section for patterns (blue gradient)
-  Widget _buildPatternLieDetector() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        // ✅ REUSED: AppColors.blueCyanGradient from Phase 1
-        gradient: AppColors.blueCyanGradient,
-        borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
-        border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '🧪 LIE DETECTOR ANALYSIS',
-            style: TextStyle(
-              color: AppColors.primaryBlue,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          
-          // ✅ EXACT React: Verdict with checkmark/X
-          Row(
-            children: [
-              Text(
-                _patternAnalysis!.lieDetector.isHonest ? '✅' : '❌',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _patternAnalysis!.lieDetector.verdict, // "Likely Dishonest Pattern"
-                style: TextStyle(
-                  color: _patternAnalysis!.lieDetector.isHonest 
-                      ? AppColors.successGreen 
-                      : AppColors.dangerRed,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          
-          // ✅ EXACT React: Suspicious Cues list (pattern-specific)
-          ...(_patternAnalysis!.lieDetector.cues.map((cue) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '•',
-                  style: TextStyle(
-                    color: AppColors.warningOrange,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    cue, // Pattern-specific cues from MockData
-                    style: TextStyle(
-                      color: AppColors.textGray300,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ))),
-          const SizedBox(height: 12),
-          
-          // ✅ EXACT React: Gut Check insight (quoted)
-          Text(
-            '"${_patternAnalysis!.lieDetector.gutCheck}"',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
     );
   }
 } 
