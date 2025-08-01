@@ -8,7 +8,7 @@ const legacyAnalysisRequestSchema = z.object({
   input_text: z.union([z.string(), z.array(z.string())]),
   content_type: z.enum(['dm', 'bio', 'story', 'post']),
   analysis_goal: z.enum(['subtext_scan', 'lie_detection', 'pattern_analysis']),
-  tone: z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty']),
+  tone: z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty', 'mature']),
   comeback_enabled: z.boolean(),
   relationship: z.string().optional(),
 });
@@ -18,9 +18,9 @@ const whisperfireAnalysisRequestSchema = z.object({
   input_text: z.union([z.string(), z.array(z.string())]),
   content_type: z.enum(['dm', 'bio', 'story', 'post']),
   analysis_goal: z.enum(['instant_scan', 'comeback_generation', 'pattern_profiling']),
-  tone: z.enum(['brutal', 'soft', 'clinical']),
+  tone: z.enum(['brutal', 'soft', 'clinical', 'mature']),
   relationship: z.enum(['Partner', 'Ex', 'Date', 'Friend', 'Coworker', 'Family', 'Roommate', 'Stranger']).optional(),
-  person_name: z.string().optional(),
+  person_name: z.string().nullable().optional(),
   style_preference: z.enum(['clipped', 'one_liner', 'reverse_uno', 'screenshot_bait', 'monologue']).optional(),
 });
 
