@@ -8,7 +8,7 @@ const legacyAnalysisRequestSchema = z.object({
   input_text: z.union([z.string(), z.array(z.string())]),
   content_type: z.enum(['dm', 'bio', 'story', 'post']),
   analysis_goal: z.enum(['subtext_scan', 'lie_detection', 'pattern_analysis']),
-  tone: z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty', 'mature']),
+  tone: z.enum(['brutal', 'soft', 'clinical', 'playful', 'petty', 'mature', 'savage']),
   comeback_enabled: z.boolean(),
   relationship: z.string().optional(),
   // 🔧 MAKE THESE OPTIONAL FOR BACKWARD COMPATIBILITY
@@ -21,10 +21,10 @@ const whisperfireAnalysisRequestSchema = z.object({
   input_text: z.union([z.string(), z.array(z.string())]),
   content_type: z.enum(['dm', 'bio', 'story', 'post']),
   analysis_goal: z.enum(['instant_scan', 'comeback_generation', 'pattern_profiling']),
-  tone: z.enum(['brutal', 'soft', 'clinical', 'mature']),
+  tone: z.enum(['brutal', 'soft', 'clinical', 'mature', 'savage']),
   relationship: z.enum(['Partner', 'Ex', 'Date', 'Friend', 'Coworker', 'Family', 'Roommate', 'Stranger']).optional(),
   person_name: z.string().nullable().optional(),
-  style_preference: z.enum(['clipped', 'one_liner', 'reverse_uno', 'screenshot_bait', 'monologue']).optional(),
+  style_preference: z.enum(['clipped', 'one_liner', 'reverse_uno', 'screenshot_bait', 'monologue']).optional().nullable(),
 });
 
 export const validateAnalysisRequest = (req: Request, res: Response, next: NextFunction) => {
