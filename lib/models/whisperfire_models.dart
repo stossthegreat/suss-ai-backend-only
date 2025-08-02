@@ -75,10 +75,10 @@ class PsychologicalScan {
 
   factory PsychologicalScan.fromMap(Map<String, dynamic> map) {
     return PsychologicalScan(
-      redFlagIntensity: map['red_flag_intensity']?.toInt() ?? 0,
-      manipulationSophistication: map['manipulation_sophistication']?.toInt() ?? 0,
-      manipulationCertainty: map['manipulation_certainty']?.toInt() ?? 0,
-      relationshipToxicity: map['relationship_toxicity']?.toInt() ?? 0,
+      redFlagIntensity: int.tryParse(map['red_flag_intensity'].toString()) ?? 0,
+      manipulationSophistication: int.tryParse(map['manipulation_sophistication'].toString()) ?? 0,
+      manipulationCertainty: int.tryParse(map['manipulation_certainty'].toString()) ?? 0,
+      relationshipToxicity: int.tryParse(map['relationship_toxicity'].toString()) ?? 0,
     );
   }
 }
@@ -164,7 +164,7 @@ class ConfidenceMetrics {
     return ConfidenceMetrics(
       ambiguityWarning: map['ambiguity_warning'],
       evidenceStrength: map['evidence_strength'] ?? '',
-      viralPotential: map['viral_potential']?.toInt() ?? 0,
+      viralPotential: int.tryParse(map['viral_potential'].toString()) ?? 0,
     );
   }
 }
@@ -218,9 +218,9 @@ class ViralMetrics {
   factory ViralMetrics.fromMap(Map<String, dynamic> map) {
     return ViralMetrics(
       whyThisWorks: map['why_this_works'] ?? '',
-      viralFactor: map['viral_factor']?.toInt() ?? 0,
-      powerLevel: map['power_level']?.toInt() ?? 0,
-      formatAppeal: map['format_appeal']?.toInt() ?? 0,
+      viralFactor: int.tryParse(map['viral_factor'].toString()) ?? 0,
+      powerLevel: int.tryParse(map['power_level'].toString()) ?? 0,
+      formatAppeal: int.tryParse(map['format_appeal'].toString()) ?? 0,
     );
   }
 }
@@ -296,7 +296,7 @@ class BehavioralProfile {
       headline: map['headline'] ?? '',
       manipulatorArchetype: map['manipulator_archetype'] ?? '',
       dominantPattern: map['dominant_pattern'] ?? '',
-      manipulationSophistication: map['manipulation_sophistication']?.toInt() ?? 0,
+      manipulationSophistication: int.tryParse(map['manipulation_sophistication'].toString()) ?? 0,
     );
   }
 }
@@ -322,7 +322,7 @@ class PatternAnalysis {
       tacticsEvolution: List<String>.from(map['tactics_evolution'] ?? []),
       escalationTimeline: map['escalation_timeline'] ?? '',
       triggerEvents: List<String>.from(map['trigger_events'] ?? []),
-      patternSeverityScore: map['pattern_severity_score']?.toInt() ?? 0,
+      patternSeverityScore: int.tryParse(map['pattern_severity_score'].toString()) ?? 0,
     );
   }
 }
@@ -350,8 +350,8 @@ class PsychologicalAssessment {
       emotionalDamageInflicted: map['emotional_damage_inflicted'] ?? '',
       powerControlMethods: List<String>.from(map['power_control_methods'] ?? []),
       empathyDeficitIndicators: List<String>.from(map['empathy_deficit_indicators'] ?? []),
-      realityDistortionLevel: map['reality_distortion_level']?.toInt() ?? 0,
-      psychologicalDamageScore: map['psychological_damage_score']?.toInt() ?? 0,
+      realityDistortionLevel: int.tryParse(map['reality_distortion_level'].toString()) ?? 0,
+      psychologicalDamageScore: int.tryParse(map['psychological_damage_score'].toString()) ?? 0,
     );
   }
 }
@@ -373,7 +373,7 @@ class RiskAssessment {
 
   factory RiskAssessment.fromMap(Map<String, dynamic> map) {
     return RiskAssessment(
-      escalationProbability: map['escalation_probability']?.toInt() ?? 0,
+      escalationProbability: int.tryParse(map['escalation_probability'].toString()) ?? 0,
       safetyConcerns: List<String>.from(map['safety_concerns'] ?? []),
       relationshipPrognosis: map['relationship_prognosis'] ?? '',
       futureBehaviorPrediction: map['future_behavior_prediction'] ?? '',
@@ -458,11 +458,11 @@ class WhisperfireResponse {
       scanResult: map['instant_read'] != null ? WhisperfireScanResult.fromMap(map) : null,
       comebackResult: map['comeback_styles'] != null ? WhisperfireComebackResult.fromMap(map) : null,
       patternResult: map['behavioral_profile'] != null ? WhisperfirePatternResult.fromMap(map) : null,
-      viralPotential: map['viral_potential']?.toInt(),
-      confidenceLevel: map['confidence_level']?.toInt(),
-      empowermentScore: map['empowerment_score']?.toInt(),
+      viralPotential: int.tryParse(map['viral_potential'].toString()) ?? 0,
+      confidenceLevel: int.tryParse(map['confidence_level'].toString()) ?? 0,
+      empowermentScore: int.tryParse(map['empowerment_score'].toString()) ?? 0,
       safetyPriority: map['safety_priority'],
-      psychologicalAccuracy: map['psychological_accuracy']?.toInt(),
+      psychologicalAccuracy: int.tryParse(map['psychological_accuracy'].toString()) ?? 0,
     );
   }
 } 
