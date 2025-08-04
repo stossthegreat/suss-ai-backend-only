@@ -1,7 +1,10 @@
+import { MultiModelAIEngine } from './MultiModelAIEngine';
+
 // 🧠 PATTERN TAB — BEHAVIORAL PROFILING WARHEAD (WHISPERFIRE TIER)
 // Relationship-adaptive pattern detection, output-style switching, and viral-grade insights
 
 export class LegendaryPatternProfilingWeapon {
+  private static aiEngine = new MultiModelAIEngine();
 
   // === RELATIONSHIP-BASED ARCHETYPE LIBRARY ===
   private static readonly ARCHETYPES = {
@@ -53,11 +56,11 @@ You are NOT a conversation coach — you are a **forensic psychologist in crisis
 `;
 
   // === BUILD PROMPT ===
-  static buildLegendaryPatternPrompt(
+  static buildPatternPrompt(
     messages: string[],
-    relationship: keyof typeof LegendaryPatternProfilingWeapon.ARCHETYPES = 'Partner',
-    outputMode: "Intel" | "Narrative" | "Roast" = "Intel",
-    tone: "brutal" | "clinical" | "soft" = "clinical",
+    relationship: keyof typeof LegendaryPatternProfilingWeapon.ARCHETYPES,
+    outputMode: "Intel" | "Narrative" | "Roast",
+    tone: "brutal" | "clinical" | "soft",
     personName?: string
   ): string {
     const messageTimeline = messages
@@ -69,17 +72,13 @@ You are NOT a conversation coach — you are a **forensic psychologist in crisis
     const chosenArchetype = archetypeList[Math.floor(Math.random() * archetypeList.length)];
 
     const toneInstructions = this.getToneInstructions(tone);
-    const nameContext = personName
-      ? `\nSUBJECT NAME: "${personName}" — personalize the psychological profile accordingly.`
-      : "";
+    const nameContext = personName ? `\nSUBJECT NAME: "${personName}" — personalize the psychological profile accordingly.` : "";
 
     // Build specialized mission
     const modeFlavor = this.getModeFlavor(outputMode, chosenArchetype);
 
     return `${this.PATTERN_CORE}
-
 ${modeFlavor}
-
 ${nameContext}
 
 🧾 MESSAGE TIMELINE:
@@ -93,7 +92,6 @@ Return ONLY this JSON format:
     "dominant_pattern": "🔄 Recurring behavioral cycle",
     "manipulation_sophistication": 0-100
   },
-
   "pattern_analysis": {
     "manipulation_cycle": "⚡ Identified cycle",
     "tactics_evolution": ["📈 Changes over time"],
@@ -101,7 +99,6 @@ Return ONLY this JSON format:
     "escalation_timeline": "📊 Escalation narrative",
     "pattern_severity_score": 0-100
   },
-
   "psychological_assessment": {
     "primary_agenda": "🎯 Ultimate goal",
     "emotional_damage_inflicted": "💥 Toll on target",
@@ -110,7 +107,6 @@ Return ONLY this JSON format:
     "reality_distortion_level": 0-100,
     "psychological_damage_score": 0-100
   },
-
   "risk_assessment": {
     "escalation_probability": 0-100,
     "safety_concerns": ["🚨 Specific red flags"],
@@ -118,7 +114,6 @@ Return ONLY this JSON format:
     "future_behavior_prediction": "🔮 Likely next phase",
     "intervention_urgency": "LOW / MODERATE / HIGH / CRITICAL"
   },
-
   "strategic_recommendations": {
     "pattern_disruption_tactics": ["🛡️ How to break the cycle"],
     "boundary_enforcement_strategy": "📋 Boundary plan",
@@ -126,14 +121,12 @@ Return ONLY this JSON format:
     "escape_strategy": "🚪 Exit plan",
     "safety_planning": "🆘 Critical safety steps"
   },
-
   "viral_insights": {
     "suss_verdict": "🔥 One-liner ${outputMode} style",
     "life_saving_insight": "✨ Key takeaway",
     "pattern_summary": "📖 Accessible recap",
     "gut_validation": "💪 Validation of instincts"
   },
-
   "confidence_metrics": {
     "analysis_confidence": 0-100,
     "prediction_confidence": 0-100,
@@ -141,8 +134,7 @@ Return ONLY this JSON format:
     "pattern_rationale": "🧠 Reason for classification",
     "viral_potential": 0-100
   }
-}
-`;
+}`;
   }
 
   // === TONE CALIBRATION ===
@@ -158,164 +150,116 @@ Return ONLY this JSON format:
   // === MODE FLAVORING ===
   private static getModeFlavor(mode: "Intel" | "Narrative" | "Roast", archetype: string): string {
     if (mode === "Intel") {
-      return `🎯 OUTPUT MODE: INTEL\n- Speak like a classified threat brief.\n- Focus on tactics, escalation, and control systems.\n- Archetype: "${archetype}"`;
+      return `🎯 OUTPUT MODE: INTEL
+- Speak like a classified threat brief.
+- Focus on tactics, escalation, and control systems.
+- Archetype: "${archetype}"`;
     }
     if (mode === "Narrative") {
-      return `🎯 OUTPUT MODE: NARRATIVE\n- Speak like a Netflix true-crime narrator.\n- Unfold the pattern like a story arc.\n- Archetype: "${archetype}"`;
+      return `🎯 OUTPUT MODE: NARRATIVE
+- Speak like a Netflix true-crime narrator.
+- Unfold the pattern like a story arc.
+- Archetype: "${archetype}"`;
     }
     if (mode === "Roast") {
-      return `🎯 OUTPUT MODE: ROAST\n- Socially lethal but truthful.\n- Make it shareable & meme-worthy.\n- Archetype: "${archetype}"`;
+      return `🎯 OUTPUT MODE: ROAST
+- Socially lethal but truthful.
+- Make it shareable & meme-worthy.
+- Archetype: "${archetype}"`;
     }
     return "";
   }
 
-  // === ANALYZE PATTERN INTELLIGENCE ===
+  // === MAIN ANALYSIS METHOD ===
   static async analyzePatternIntelligence(
     messages: string[],
-    relationship: keyof typeof LegendaryPatternProfilingWeapon.ARCHETYPES = 'Partner',
-    outputMode: "Intel" | "Narrative" | "Roast" = "Intel",
-    tone: "brutal" | "clinical" | "soft" = "clinical",
-    personName?: string
+    relationship: keyof typeof LegendaryPatternProfilingWeapon.ARCHETYPES,
+    outputMode: "Intel" | "Narrative" | "Roast",
+    tone: "brutal" | "clinical" | "soft",
+    personName?: string,
+    preferredModel?: string
   ): Promise<any> {
     try {
-      // Build the prompt with relationship-adaptive archetypes
-      const prompt = this.buildLegendaryPatternPrompt(messages, relationship, outputMode, tone, personName);
+      const prompt = this.buildPatternPrompt(messages, relationship, outputMode, tone, personName);
       
-      console.log('🧠 LegendaryPatternProfilingWeapon: Building prompt for', {
-        relationship,
-        outputMode,
-        tone,
-        messageCount: messages.length,
-        personName
+      // Use the multi-model AI engine
+      const response = await this.aiEngine.generateResponse({
+        prompt,
+        model: preferredModel, // Use specified model or default
+        temperature: 0.8, // Slightly creative for pattern analysis
+        maxTokens: 3000,
       });
 
-      // TODO: Integrate with actual AI service (OpenAI, Anthropic, etc.)
-      // For now, return mock data that matches the new structure
-      const mockResponse = this.generateMockResponse(relationship, outputMode, personName);
+      console.log(`✅ Pattern analysis completed using ${response.model} (${response.provider})`);
       
-      console.log('✅ LegendaryPatternProfilingWeapon: Generated response for', outputMode, 'mode');
-      return mockResponse;
-      
+      // Parse the JSON response
+      try {
+        const parsedResponse = JSON.parse(response.content);
+        return parsedResponse;
+      } catch (parseError) {
+        console.error('❌ Failed to parse AI response as JSON:', parseError);
+        console.log('Raw response:', response.content);
+        
+        // Return a fallback response if parsing fails
+        return this.getFallbackResponse(relationship, outputMode);
+      }
     } catch (error) {
-      console.error('❌ LegendaryPatternProfilingWeapon: Error analyzing pattern intelligence:', error);
+      console.error('❌ Pattern analysis failed:', error);
       throw error;
     }
   }
 
-  // === MOCK RESPONSE GENERATOR ===
-  private static generateMockResponse(
-    relationship: keyof typeof LegendaryPatternProfilingWeapon.ARCHETYPES,
-    outputMode: "Intel" | "Narrative" | "Roast",
-    personName?: string
-  ): any {
-    const archetypeList = this.ARCHETYPES[relationship]?.[outputMode] || [];
-    const chosenArchetype = archetypeList[Math.floor(Math.random() * archetypeList.length)];
-
-    const name = personName || "Subject";
-    const relationshipContext = this.getRelationshipContext(relationship);
-
+  // === FALLBACK RESPONSE ===
+  private static getFallbackResponse(relationship: string, outputMode: string): any {
     return {
-      "behavioral_profile": {
-        "headline": `🔥 ${name} is running a ${relationshipContext} psychological operation`,
-        "manipulator_archetype": chosenArchetype,
-        "dominant_pattern": "🔄 Love bombing → intermittent reward → reality distortion → dependency creation",
-        "manipulation_sophistication": 87
+      behavioral_profile: {
+        headline: "⚠️ Analysis temporarily unavailable",
+        manipulator_archetype: "Unknown Pattern",
+        dominant_pattern: "Data processing error",
+        manipulation_sophistication: 50
       },
-
-      "pattern_analysis": {
-        "manipulation_cycle": "⚡ Perfect partner facade → boundary testing → gaslighting → control establishment",
-        "tactics_evolution": [
-          "📈 Phase 1: Mirroring and love bombing (weeks 1-2)",
-          "📈 Phase 2: Subtle boundary violations (weeks 3-4)",
-          "📈 Phase 3: Reality distortion campaign (weeks 5-8)",
-          "📈 Phase 4: Complete psychological ownership (months 2-6)"
-        ],
-        "trigger_events": [
-          "🎭 When you show independence",
-          "🎭 When you question their behavior",
-          "🎭 When you set boundaries",
-          "🎭 When you seek support from others"
-        ],
-        "escalation_timeline": "📊 Rapid escalation from charm to control within 6-8 weeks",
-        "pattern_severity_score": 89
+      pattern_analysis: {
+        manipulation_cycle: "Unable to analyze",
+        tactics_evolution: ["Analysis pending"],
+        trigger_events: ["Data unavailable"],
+        escalation_timeline: "Cannot determine",
+        pattern_severity_score: 50
       },
-
-      "psychological_assessment": {
-        "primary_agenda": "🎯 Complete emotional and financial dependency",
-        "emotional_damage_inflicted": "💥 Systematic erosion of self-trust and reality perception",
-        "power_control_methods": [
-          "👑 Intermittent reinforcement (hot/cold cycles)",
-          "👑 Gaslighting and reality distortion",
-          "👑 Isolation from support systems",
-          "👑 Financial entanglement strategies"
-        ],
-        "empathy_deficit_indicators": [
-          "🧊 Lack of genuine remorse",
-          "🧊 Inability to validate your feelings",
-          "🧊 Viewing relationships as transactions",
-          "🧊 Exploiting your vulnerabilities"
-        ],
-        "reality_distortion_level": 78,
-        "psychological_damage_score": 85
+      psychological_assessment: {
+        primary_agenda: "Analysis pending",
+        emotional_damage_inflicted: "Unknown",
+        power_control_methods: ["Analysis pending"],
+        empathy_deficit_indicators: ["Analysis pending"],
+        reality_distortion_level: 50,
+        psychological_damage_score: 50
       },
-
-      "risk_assessment": {
-        "escalation_probability": 92,
-        "safety_concerns": [
-          "🚨 Increasing control over your decisions",
-          "🚨 Attempts to isolate you from friends/family",
-          "🚨 Financial dependency creation",
-          "🚨 Emotional blackmail and threats"
-        ],
-        "relationship_prognosis": "⚠️ High risk of complete psychological control within 3-6 months",
-        "future_behavior_prediction": "🔮 Will escalate to financial control and complete isolation",
-        "intervention_urgency": "HIGH"
+      risk_assessment: {
+        escalation_probability: 50,
+        safety_concerns: ["Analysis pending"],
+        relationship_prognosis: "Cannot determine",
+        future_behavior_prediction: "Analysis pending",
+        intervention_urgency: "MODERATE"
       },
-
-      "strategic_recommendations": {
-        "pattern_disruption_tactics": [
-          "🛡️ Gray rock method - become emotionally unavailable",
-          "🛡️ Document all interactions for evidence",
-          "🛡️ Maintain financial independence",
-          "🛡️ Strengthen support network connections"
-        ],
-        "boundary_enforcement_strategy": "📋 Clear, firm boundaries with immediate consequences for violations",
-        "communication_guidelines": "💬 Minimal contact, factual responses only, no emotional engagement",
-        "escape_strategy": "🚪 Gradual withdrawal while securing all resources and support systems",
-        "safety_planning": "🆘 Document everything, maintain financial independence, build support network, consider professional counseling"
+      strategic_recommendations: {
+        pattern_disruption_tactics: ["Analysis pending"],
+        boundary_enforcement_strategy: "Analysis pending",
+        communication_guidelines: "Analysis pending",
+        escape_strategy: "Analysis pending",
+        safety_planning: "Analysis pending"
       },
-
-      "viral_insights": {
-        "suss_verdict": outputMode === "Intel" 
-          ? "🚨 CLASSIFIED: Advanced psychological warfare detected"
-          : outputMode === "Narrative"
-          ? "💔 You didn't meet your soulmate, you met a tactician"
-          : "🔥 Walking, talking red flag parade",
-        "life_saving_insight": "✨ Your gut feeling is correct - this is not love, it's control",
-        "pattern_summary": "📖 Classic narcissistic abuse cycle with sophisticated manipulation tactics",
-        "gut_validation": "💪 Every instinct you have is valid - trust your intuition"
+      viral_insights: {
+        suss_verdict: "⚠️ Analysis temporarily unavailable",
+        life_saving_insight: "Please try again later",
+        pattern_summary: "Analysis pending",
+        gut_validation: "Analysis pending"
       },
-
-      "confidence_metrics": {
-        "analysis_confidence": 94,
-        "prediction_confidence": 87,
-        "evidence_quality": "Strong",
-        "pattern_rationale": "🧠 Clear evidence of systematic manipulation, gaslighting, and control tactics",
-        "viral_potential": 96
+      confidence_metrics: {
+        analysis_confidence: 0,
+        prediction_confidence: 0,
+        evidence_quality: "Limited",
+        pattern_rationale: "Analysis failed",
+        viral_potential: 0
       }
     };
-  }
-
-  // === RELATIONSHIP CONTEXT HELPER ===
-  private static getRelationshipContext(relationship: string): string {
-    const contexts = {
-      Partner: "romantic relationship",
-      Ex: "post-breakup harassment",
-      Family: "generational trauma",
-      Friend: "social manipulation",
-      Coworker: "professional sabotage",
-      Date: "dating manipulation"
-    };
-    return contexts[relationship as keyof typeof contexts] || "psychological";
   }
 } 
