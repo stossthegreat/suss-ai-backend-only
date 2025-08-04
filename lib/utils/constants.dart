@@ -91,4 +91,12 @@ class AppConstants {
     TabItem(id: 'history', label: 'History', iconData: 'history'),
     TabItem(id: 'settings', label: 'Settings', iconData: 'settings'),
   ];
+
+  // AI Models
+  static const List<String> models = [
+    'gpt-4-turbo',
+    'claude-3-opus',
+    'claude-3-sonnet',
+    'deepseek-v3',
+  ];
 } 

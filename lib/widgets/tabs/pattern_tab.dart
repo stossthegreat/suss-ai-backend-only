@@ -399,7 +399,7 @@ class _PatternTabState extends State<PatternTab> {
                     border: Border.all(
                       color: _selectedOutputStyle == 'elite_intel'
                           ? AppColors.primaryPink
-                          : AppColors.borderColor,
+                          : AppColors.borderGray600,
                       width: 2,
                     ),
                   ),
@@ -412,7 +412,7 @@ class _PatternTabState extends State<PatternTab> {
                             Icons.security,
                             color: _selectedOutputStyle == 'elite_intel'
                                 ? AppColors.primaryPink
-                                : AppColors.textSecondary,
+                                : AppColors.textGray400,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -422,7 +422,7 @@ class _PatternTabState extends State<PatternTab> {
                               fontWeight: FontWeight.bold,
                               color: _selectedOutputStyle == 'elite_intel'
                                   ? AppColors.primaryPink
-                                  : AppColors.textPrimary,
+                                  : AppColors.textWhite,
                             ),
                           ),
                         ],
@@ -432,7 +432,7 @@ class _PatternTabState extends State<PatternTab> {
                         'Professional analysis',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textGray400,
                         ),
                       ),
                     ],
@@ -458,7 +458,7 @@ class _PatternTabState extends State<PatternTab> {
                     border: Border.all(
                       color: _selectedOutputStyle == 'narrative'
                           ? AppColors.primaryCyan
-                          : AppColors.borderColor,
+                          : AppColors.borderGray600,
                       width: 2,
                     ),
                   ),
@@ -471,7 +471,7 @@ class _PatternTabState extends State<PatternTab> {
                             Icons.article,
                             color: _selectedOutputStyle == 'narrative'
                                 ? AppColors.primaryCyan
-                                : AppColors.textSecondary,
+                                : AppColors.textGray400,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -481,7 +481,7 @@ class _PatternTabState extends State<PatternTab> {
                               fontWeight: FontWeight.bold,
                               color: _selectedOutputStyle == 'narrative'
                                   ? AppColors.primaryCyan
-                                  : AppColors.textPrimary,
+                                  : AppColors.textWhite,
                             ),
                           ),
                         ],
@@ -491,7 +491,7 @@ class _PatternTabState extends State<PatternTab> {
                         'Story-driven insights',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textGray400,
                         ),
                       ),
                     ],
@@ -517,7 +517,7 @@ class _PatternTabState extends State<PatternTab> {
                     border: Border.all(
                       color: _selectedOutputStyle == 'roast'
                           ? AppColors.warningOrange
-                          : AppColors.borderColor,
+                          : AppColors.borderGray600,
                       width: 2,
                     ),
                   ),
@@ -530,7 +530,7 @@ class _PatternTabState extends State<PatternTab> {
                             Icons.local_fire_department,
                             color: _selectedOutputStyle == 'roast'
                                 ? AppColors.warningOrange
-                                : AppColors.textSecondary,
+                                : AppColors.textGray400,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -540,7 +540,7 @@ class _PatternTabState extends State<PatternTab> {
                               fontWeight: FontWeight.bold,
                               color: _selectedOutputStyle == 'roast'
                                   ? AppColors.warningOrange
-                                  : AppColors.textPrimary,
+                                  : AppColors.textWhite,
                             ),
                           ),
                         ],
@@ -550,7 +550,7 @@ class _PatternTabState extends State<PatternTab> {
                         'Viral & entertaining',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textGray400,
                         ),
                       ),
                     ],
