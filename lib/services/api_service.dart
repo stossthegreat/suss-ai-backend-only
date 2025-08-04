@@ -4,8 +4,11 @@ import '../models/analysis_result.dart';
 import '../models/whisperfire_models.dart';
 
 class ApiService {
-  // 🚀 RAILWAY BACKEND URL (for scan and comeback features)
+  // 🚀 NEW BACKEND URL (with multi-model AI support)
   static const String baseUrl = 'https://suss-ai-backend-only-production-c323.up.railway.app/api/v1';
+  
+  // TODO: Update this URL once the new backend is deployed
+  // static const String baseUrl = 'https://your-new-backend-url.railway.app/api/v1';
   
   // static const String baseUrl = 'http://127.0.0.1:3000/api/v1'; // For local development
 
@@ -251,28 +254,44 @@ class ApiService {
           );
           
         case 'pattern_profiling':
-          // Use the existing Railway backend for pattern analysis (fallback to mock data)
+          // Use the new backend with multi-model AI support
           try {
             final patternResult = WhisperfirePatternResult.fromMap(data);
             return WhisperfireResponse(
               patternResult: patternResult,
               viralPotential: patternResult.confidenceMetrics.viralPotential,
-              confidenceLevel: patternResult.confidenceMetrics.viralPotential,
+              confidenceLevel: patternResult.confidenceMetrics.analysisConfidence,
               empowermentScore: 90, // Very high empowerment for pattern insights
               safetyPriority: patternResult.riskAssessment.interventionUrgency,
-              psychologicalAccuracy: patternResult.confidenceMetrics.viralPotential,
+              psychologicalAccuracy: patternResult.confidenceMetrics.analysisConfidence,
             );
           } catch (e) {
-            print('❌ Pattern analysis failed, using fallback data: $e');
-            // Return fallback pattern data
-            return WhisperfireResponse(
-              patternResult: _getFallbackPatternResult(),
-              viralPotential: 85,
-              confidenceLevel: 80,
-              empowermentScore: 90,
-              safetyPriority: 'HIGH',
-              psychologicalAccuracy: 85,
-            );
+            print('❌ Pattern analysis failed, backend may not support new format: $e');
+            print('❌ Raw data received: $data');
+            
+            // Try to extract basic pattern info from the response
+            try {
+              final basicPatternResult = _extractBasicPatternResult(data);
+              return WhisperfireResponse(
+                patternResult: basicPatternResult,
+                viralPotential: 75,
+                confidenceLevel: 70,
+                empowermentScore: 85,
+                safetyPriority: 'MODERATE',
+                psychologicalAccuracy: 70,
+              );
+            } catch (extractError) {
+              print('❌ Failed to extract basic pattern data: $extractError');
+              // Return minimal fallback only if everything fails
+              return WhisperfireResponse(
+                patternResult: _getMinimalFallbackPatternResult(),
+                viralPotential: 60,
+                confidenceLevel: 50,
+                empowermentScore: 70,
+                safetyPriority: 'LOW',
+                psychologicalAccuracy: 50,
+              );
+            }
           }
           
         default:
@@ -408,6 +427,79 @@ class ApiService {
         'ambiguity_warning': null,
         'evidence_strength': 'Multiple manipulation patterns detected across all messages with high consistency',
         'viral_potential': 94
+      }
+    });
+  }
+
+  // 🛡️ EXTRACT BASIC PATTERN RESULT FOR LEGENDARY INTELLIGENCE
+  static WhisperfirePatternResult _extractBasicPatternResult(Map<String, dynamic> data) {
+    final behaviorProfile = data['behavioral_profile'] as Map<String, dynamic>?;
+    final patternAnalysis = data['pattern_analysis'] as Map<String, dynamic>?;
+    final psychologicalAssessment = data['psychological_assessment'] as Map<String, dynamic>?;
+    final riskAssessment = data['risk_assessment'] as Map<String, dynamic>?;
+    final strategicRecommendations = data['strategic_recommendations'] as Map<String, dynamic>?;
+    final viralInsights = data['viral_insights'] as Map<String, dynamic>?;
+    final confidenceMetrics = data['confidence_metrics'] as Map<String, dynamic>?;
+
+    return WhisperfirePatternResult(
+      behavioralProfile: behaviorProfile != null ? WhisperfireBehavioralProfile.fromMap(behaviorProfile) : null,
+      patternAnalysis: patternAnalysis != null ? WhisperfirePatternAnalysis.fromMap(patternAnalysis) : null,
+      psychologicalAssessment: psychologicalAssessment != null ? WhisperfirePsychologicalAssessment.fromMap(psychologicalAssessment) : null,
+      riskAssessment: riskAssessment != null ? WhisperfireRiskAssessment.fromMap(riskAssessment) : null,
+      strategicRecommendations: strategicRecommendations != null ? WhisperfireStrategicRecommendations.fromMap(strategicRecommendations) : null,
+      viralInsights: viralInsights != null ? WhisperfireViralInsights.fromMap(viralInsights) : null,
+      confidenceMetrics: confidenceMetrics != null ? WhisperfireConfidenceMetrics.fromMap(confidenceMetrics) : null,
+    );
+  }
+
+  // 🛡️ MINIMAL FALLBACK PATTERN RESULT FOR LEGENDARY INTELLIGENCE
+  static WhisperfirePatternResult _getMinimalFallbackPatternResult() {
+    return WhisperfirePatternResult.fromMap({
+      'behavioral_profile': {
+        'headline': 'Pattern Analysis Failed',
+        'manipulator_archetype': 'Unknown',
+        'dominant_pattern': 'Unknown',
+        'manipulation_sophistication': 0
+      },
+      'pattern_analysis': {
+        'manipulation_cycle': 'N/A',
+        'tactics_evolution': [],
+        'escalation_timeline': 'N/A',
+        'trigger_events': [],
+        'pattern_severity_score': 0
+      },
+      'psychological_assessment': {
+        'primary_agenda': 'N/A',
+        'emotional_damage_inflicted': 'N/A',
+        'power_control_methods': [],
+        'empathy_deficit_indicators': [],
+        'reality_distortion_level': 0,
+        'psychological_damage_score': 0
+      },
+      'risk_assessment': {
+        'escalation_probability': 0,
+        'safety_concerns': [],
+        'relationship_prognosis': 'N/A',
+        'future_behavior_prediction': 'N/A',
+        'intervention_urgency': 'N/A'
+      },
+      'strategic_recommendations': {
+        'pattern_disruption_tactics': [],
+        'boundary_enforcement_strategy': 'N/A',
+        'communication_guidelines': 'N/A',
+        'escape_strategy': 'N/A',
+        'safety_planning': 'N/A'
+      },
+      'viral_insights': {
+        'suss_verdict': 'Pattern analysis failed',
+        'life_saving_insight': 'N/A',
+        'pattern_summary': 'N/A',
+        'gut_validation': 'N/A'
+      },
+      'confidence_metrics': {
+        'ambiguity_warning': null,
+        'evidence_strength': 'N/A',
+        'viral_potential': 0
       }
     });
   }

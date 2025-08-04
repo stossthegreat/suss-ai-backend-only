@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
-import { LegendaryPatternProfilingWeapon } from '../services/LegendaryPatternProfilingWeapon';
+import { PatternProfilingWeapon } from '../prompts/whisperfirePattern';
+import { MultiModelAIEngine } from '../services/MultiModelAIEngine';
 
 export class PatternController {
+  private static aiEngine = new MultiModelAIEngine();
+
   static async analyzePattern(req: Request, res: Response) {
     try {
       const {
@@ -54,23 +57,44 @@ export class PatternController {
 
       console.log(`🚀 Starting pattern analysis with ${preferred_model}...`);
 
-      const patternIntelligence = await LegendaryPatternProfilingWeapon.analyzePatternIntelligence(
+      // Build the prompt using the existing PatternProfilingWeapon
+      const prompt = PatternProfilingWeapon.buildPatternPrompt(
         messages,
-        relationship as any,
+        relationship,
         outputMode as any,
-        tone as any,
-        person_name,
-        preferred_model
+        tone,
+        person_name
       );
 
-      console.log('✅ Pattern analysis completed successfully');
-
-      return res.status(200).json({
-        success: true,
-        data: patternIntelligence,
-        message: 'Pattern intelligence analysis completed',
-        model_used: preferred_model
+      // Use the multi-model AI engine
+      const response = await this.aiEngine.generateResponse({
+        prompt,
+        model: preferred_model,
+        temperature: 0.8, // Slightly creative for pattern analysis
+        maxTokens: 3000,
       });
+
+      console.log(`✅ Pattern analysis completed using ${response.model} (${response.provider})`);
+      
+      // Parse the JSON response
+      try {
+        const parsedResponse = JSON.parse(response.content);
+        return res.status(200).json({
+          success: true,
+          data: parsedResponse,
+          message: 'Pattern intelligence analysis completed',
+          model_used: preferred_model
+        });
+      } catch (parseError) {
+        console.error('❌ Failed to parse AI response as JSON:', parseError);
+        console.log('Raw response:', response.content);
+        
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to parse AI response',
+          details: 'The AI response was not in the expected JSON format'
+        });
+      }
 
     } catch (error) {
       console.error('❌ Pattern analysis failed:', error);
@@ -106,33 +130,15 @@ export class PatternController {
 
   static async getAvailableModels(req: Request, res: Response) {
     try {
-      // This would return available models from the MultiModelAIEngine
-      const availableModels = [
-        {
-          id: 'gpt-4-turbo',
-          name: 'GPT-4 Turbo',
-          provider: 'OpenAI',
-          description: 'Latest GPT-4 model with improved reasoning'
-        },
-        {
-          id: 'claude-3-opus',
-          name: 'Claude 3 Opus',
-          provider: 'Anthropic',
-          description: 'Most capable Claude model'
-        },
-        {
-          id: 'claude-3-sonnet',
-          name: 'Claude 3 Sonnet',
-          provider: 'Anthropic',
-          description: 'Balanced Claude model'
-        },
-        {
-          id: 'deepseek-v3',
-          name: 'DeepSeek V3',
-          provider: 'Together AI',
-          description: 'Advanced coding and reasoning model'
-        }
-      ];
+      const availableModels = this.aiEngine.getAvailableModels().map(modelId => {
+        const modelInfo = this.aiEngine.getModelInfo(modelId);
+        return {
+          id: modelId,
+          name: modelInfo?.name || modelId,
+          provider: modelInfo?.provider || 'Unknown',
+          description: this.getModelDescription(modelId)
+        };
+      });
 
       return res.status(200).json({
         success: true,
@@ -143,6 +149,21 @@ export class PatternController {
         success: false,
         error: 'Failed to get available models'
       });
+    }
+  }
+
+  private static getModelDescription(modelId: string): string {
+    switch (modelId) {
+      case 'gpt-4-turbo':
+        return 'The latest and most powerful model from OpenAI, capable of handling complex tasks and providing detailed insights.';
+      case 'claude-3-opus':
+        return 'Most capable Claude model with advanced reasoning and analysis capabilities.';
+      case 'claude-3-sonnet':
+        return 'Balanced Claude model offering good performance for pattern analysis.';
+      case 'deepseek-v3':
+        return 'Advanced coding and reasoning model, excellent for complex pattern detection.';
+      default:
+        return 'A powerful AI model for pattern analysis.';
     }
   }
 } 
