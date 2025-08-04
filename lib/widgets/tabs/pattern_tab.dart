@@ -25,6 +25,7 @@ class _PatternTabState extends State<PatternTab> {
   final TextEditingController _nameController = TextEditingController();
   bool _isAnalyzing = false;
   WhisperfireResponse? _analysis;
+  String _selectedOutputStyle = 'elite_intel'; // Default to Elite Intel Mode
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _PatternTabState extends State<PatternTab> {
         analysisGoal: 'pattern_profiling',
         tone: 'clinical',
         relationship: _selectedRelationship,
+        outputStyle: _selectedOutputStyle, // Pass the selected output style
       );
 
       if (mounted) {
@@ -124,6 +126,10 @@ class _PatternTabState extends State<PatternTab> {
           
           // Message Stack
           _buildMessageStack(),
+          const SizedBox(height: 24),
+          
+          // Output Style Selector
+          _buildOutputStyleSelector(),
           const SizedBox(height: 24),
           
           // Analyze Button
@@ -355,7 +361,203 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
-  // ✅ ANALYZE BUTTON - Matches React: Purple gradient, requires 2+ messages
+  Widget _buildOutputStyleSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Output Style',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedOutputStyle = 'elite_intel';
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _selectedOutputStyle == 'elite_intel'
+                        ? AppColors.primaryPink.withOpacity(0.2)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _selectedOutputStyle == 'elite_intel'
+                          ? AppColors.primaryPink
+                          : AppColors.borderColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.security,
+                            color: _selectedOutputStyle == 'elite_intel'
+                                ? AppColors.primaryPink
+                                : AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Elite Intel',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _selectedOutputStyle == 'elite_intel'
+                                  ? AppColors.primaryPink
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Professional analysis',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedOutputStyle = 'narrative';
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _selectedOutputStyle == 'narrative'
+                        ? AppColors.primaryCyan.withOpacity(0.2)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _selectedOutputStyle == 'narrative'
+                          ? AppColors.primaryCyan
+                          : AppColors.borderColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.story,
+                            color: _selectedOutputStyle == 'narrative'
+                                ? AppColors.primaryCyan
+                                : AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Narrative',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _selectedOutputStyle == 'narrative'
+                                  ? AppColors.primaryCyan
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Story-driven insights',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedOutputStyle = 'roast';
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _selectedOutputStyle == 'roast'
+                        ? AppColors.warningOrange.withOpacity(0.2)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _selectedOutputStyle == 'roast'
+                          ? AppColors.warningOrange
+                          : AppColors.borderColor,
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            color: _selectedOutputStyle == 'roast'
+                                ? AppColors.warningOrange
+                                : AppColors.textSecondary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Roast',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _selectedOutputStyle == 'roast'
+                                  ? AppColors.warningOrange
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Viral & entertaining',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildAnalyzeButton() {
     // Debug logging
     print('🔍 Pattern Tab Debug:');

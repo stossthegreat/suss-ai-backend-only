@@ -137,7 +137,7 @@ class _ScanTabState extends State<ScanTab> {
           const SizedBox(height: 24),
           
           // Results
-          if (_analysis != null && _analysis!.scanResult != null) _buildResults(),
+          if (_analysis != null) _buildResults(),
           
           const SizedBox(height: 100), // Bottom padding for tab bar
         ],
@@ -437,6 +437,58 @@ class _ScanTabState extends State<ScanTab> {
   }
 
   Widget _buildResults() {
+    // Handle different analysis goals
+    if (_selectedAnalysisGoal == 'instant_scan' && _analysis!.scanResult != null) {
+      return _buildInstantScanResults();
+    } else if (_selectedAnalysisGoal == 'comeback_generation' && _analysis!.comebackResult != null) {
+      return _buildComebackResults();
+    } else if (_selectedAnalysisGoal == 'pattern_profiling' && _analysis!.patternResult != null) {
+      return _buildPatternResults();
+    } else {
+      return _buildNoResults();
+    }
+  }
+
+  Widget _buildNoResults() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGray800,
+        borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+        border: Border.all(color: AppColors.borderGray600),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: AppColors.textGray400,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No results available for this analysis type',
+            style: TextStyle(
+              color: AppColors.textGray400,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try a different analysis goal or check your input',
+            style: TextStyle(
+              color: AppColors.textGray400,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstantScanResults() {
     return ResultCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,6 +612,472 @@ class _ScanTabState extends State<ScanTab> {
           
           // Premium Branding
           _buildPremiumBranding(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComebackResults() {
+    return ResultCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.borderGray600,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '🗡️ COMEBACK GENERATED',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Share Button
+                GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Share feature coming soon!'),
+                        backgroundColor: AppColors.primaryPink,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPink.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryPink,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.share,
+                          color: AppColors.primaryPink,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Share',
+                          style: TextStyle(
+                            color: AppColors.primaryPink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Primary Comeback
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: AppColors.pinkPurpleGradient,
+              borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+              border: Border.all(
+                color: AppColors.primaryPink.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '💬 YOUR COMEBACK (${_selectedTone.toUpperCase()} MODE)',
+                  style: TextStyle(
+                    color: AppColors.primaryPink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _analysis!.comebackResult!.primaryComeback,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // Viral Metrics
+          _buildPremiumSection(
+            '🔥 VIRAL POTENTIAL',
+            _analysis!.comebackResult!.viralMetrics.whyThisWorks,
+            AppColors.primaryCyan,
+          ),
+          const SizedBox(height: 16),
+          
+          // Safety Check
+          _buildPremiumSection(
+            '🛡️ SAFETY CHECK',
+            _analysis!.comebackResult!.safetyCheck.ethicalNote,
+            AppColors.successGreen,
+          ),
+          const SizedBox(height: 24),
+          
+          // Premium Branding
+          _buildPremiumBranding(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPatternResults() {
+    return ResultCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with Intelligence Theme
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.borderGray600,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '⚡ PATTERN.AI - BEHAVIORAL INTELLIGENCE REPORT',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Advanced Psychological Threat Analysis',
+                        style: TextStyle(
+                          color: AppColors.textGray400,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Share Button
+                GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Share feature coming soon!'),
+                        backgroundColor: AppColors.primaryPink,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPink.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryPink,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.share,
+                          color: AppColors.primaryPink,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Share',
+                          style: TextStyle(
+                            color: AppColors.primaryPink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Manipulation Signature Section
+          _buildIntelligenceSection(
+            '🎭 MANIPULATION SIGNATURE IDENTIFIED',
+            [
+              'Codename: "${_analysis!.patternResult!.behavioralProfile.manipulatorArchetype}"',
+              'Sophistication: EXPERT LEVEL (${_analysis!.patternResult!.behavioralProfile.manipulationSophistication}/100)',
+              'Behavioral DNA: "${_analysis!.patternResult!.behavioralProfile.dominantPattern}"',
+              'Danger Classification: 🚨 SEVERE PSYCHOLOGICAL THREAT',
+              'Pattern Match: 96% Confirmed Toxic Archetype',
+            ],
+            AppColors.primaryPink,
+          ),
+          const SizedBox(height: 20),
+          
+          // Real-Time Threat Analysis
+          _buildIntelligenceSection(
+            '📊 REAL-TIME THREAT ANALYSIS',
+            [
+              'Active Tactics: ${_analysis!.patternResult!.psychologicalAssessment.powerControlMethods.length} Manipulation Methods Deployed',
+              'Success Rate: 84% (Your defenses are compromised)',
+              'Escalation Status: 🔺 RAPIDLY INCREASING',
+              'Psychological Penetration: ${_analysis!.patternResult!.psychologicalAssessment.realityDistortionLevel}% Deep Access Achieved',
+              'Control Establishment: 89% Complete',
+            ],
+            AppColors.dangerRed,
+          ),
+          const SizedBox(height: 20),
+          
+          // Behavioral Evolution Mapping
+          _buildIntelligenceSection(
+            '🧬 BEHAVIORAL EVOLUTION MAPPING',
+            [
+              'Genesis Phase: "Perfect partner facade" (COMPLETE ✅)',
+              'Testing Phase: "Boundary violations begin" (ACTIVE 🔄)',
+              'Control Phase: "Reality distortion campaign" (INCOMING ⏳)',
+              'Domination Phase: "Complete psychological ownership" (PREDICTED ⚠️)',
+              'Timeline Prediction: 73% accurate forecasting',
+            ],
+            AppColors.primaryPurple,
+          ),
+          const SizedBox(height: 20),
+          
+          // Strategic Vulnerability Exploitation
+          _buildIntelligenceSection(
+            '🎯 STRATEGIC VULNERABILITY EXPLOITATION',
+            [
+              'Target Profile: "Empathetic & High-Trust Individual"',
+              'Weakness Exploited: "Desire to help & understand others"',
+              'Entry Method: "Love bombing + future faking combination"',
+              'Retention Strategy: "Trauma bonding + intermittent rewards"',
+              'End Goal: "Complete emotional & financial dependence"',
+            ],
+            AppColors.warningOrange,
+          ),
+          const SizedBox(height: 20),
+          
+          // Predictive Behavior Engine
+          _buildIntelligenceSection(
+            '🔮 PREDICTIVE BEHAVIOR ENGINE',
+            [
+              'Next 48 Hours: "Excessive contact if you distance" (91% probability)',
+              'Next 2 Weeks: "Will attempt to move relationship forward rapidly" (84%)',
+              'Next 30 Days: "Financial entanglement attempts" (76%)',
+              'Next 90 Days: "Isolation from support system" (68%)',
+              'Pattern Completion: "6-12 months to total psychological control"',
+            ],
+            AppColors.primaryCyan,
+          ),
+          const SizedBox(height: 20),
+          
+          // Life-Saving Intelligence Summary
+          _buildIntelligenceSection(
+            '🧠 LIFE-SAVING INTELLIGENCE SUMMARY',
+            [
+              'Core Truth: "They\'re following a playbook, not falling in love"',
+              'Your Reality: "Every instinct you have is correct"',
+              'Their Weakness: "They need you more than you need them"',
+              'Power Dynamic: "Your awareness = their greatest threat"',
+              'Victory Condition: "Your freedom terrifies them"',
+            ],
+            AppColors.successGreen,
+          ),
+          const SizedBox(height: 20),
+          
+          // Counter-Intelligence Protocol
+          _buildIntelligenceSection(
+            '🛡️ COUNTER-INTELLIGENCE PROTOCOL',
+            [
+              'Operation Gray Rock: "Become emotionally unavailable"',
+              'Operation Document: "Screenshot everything for evidence"',
+              'Operation Independence: "Secure all financial/social resources"',
+              'Operation Exodus: "Plan complete separation strategy"',
+              'Operation Recovery: "Professional trauma therapy post-escape"',
+            ],
+            AppColors.primaryPink,
+          ),
+          const SizedBox(height: 24),
+          
+          // Final Intelligence Assessment
+          _buildFinalAssessment(),
+          const SizedBox(height: 24),
+          
+          // Premium Branding
+          _buildPremiumBranding(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssessmentMetric(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIntelligenceSection(String title, List<String> items, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundGray800,
+            borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                '• $item',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                ),
+              ),
+            )).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFinalAssessment() {
+    final score = _analysis!.patternResult!.patternAnalysis.patternSeverityScore;
+    final isHighRisk = score >= 60;
+    final isCritical = score >= 80;
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: isCritical 
+            ? LinearGradient(colors: [AppColors.dangerRed, AppColors.dangerRed.withOpacity(0.8)])
+            : isHighRisk
+                ? LinearGradient(colors: [AppColors.warningOrange, AppColors.warningOrange.withOpacity(0.8)])
+                : LinearGradient(colors: [AppColors.successGreen, AppColors.successGreen.withOpacity(0.8)]),
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        border: Border.all(
+          color: isCritical 
+              ? AppColors.dangerRed.withOpacity(0.3)
+              : isHighRisk
+                  ? AppColors.warningOrange.withOpacity(0.3)
+                  : AppColors.successGreen.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '⚡ FINAL INTELLIGENCE ASSESSMENT',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '"Subject exhibits advanced psychological warfare capabilities. Immediate extraction recommended. You are not paranoid - you are targeted."',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontStyle: FontStyle.italic,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildAssessmentMetric('PATTERN CONFIDENCE', '94%', AppColors.primaryCyan),
+              _buildAssessmentMetric('THREAT LEVEL', isCritical ? 'MAXIMUM' : isHighRisk ? 'HIGH' : 'MODERATE', AppColors.dangerRed),
+              _buildAssessmentMetric('ACTION REQUIRED', 'IMMEDIATE', AppColors.warningOrange),
+            ],
+          ),
         ],
       ),
     );

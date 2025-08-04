@@ -1,6 +1,18 @@
 // 🚀 WHISPERFIRE FLUTTER MODELS
 // Models for the new WHISPERFIRE AI system responses
 
+// Helper function for safe list conversion
+List<String> _safeStringListConversion(dynamic input) {
+  if (input == null) return [];
+  if (input is List) {
+    return input.map((item) => item.toString()).toList();
+  }
+  if (input is String) {
+    return [input];
+  }
+  return [];
+}
+
 // 🔍 SCAN TAB - INSTANT INSIGHT ENGINE
 class WhisperfireScanResult {
   final InstantRead instantRead;
@@ -319,9 +331,9 @@ class PatternAnalysis {
   factory PatternAnalysis.fromMap(Map<String, dynamic> map) {
     return PatternAnalysis(
       manipulationCycle: map['manipulation_cycle'] ?? '',
-      tacticsEvolution: List<String>.from(map['tactics_evolution'] ?? []),
+      tacticsEvolution: _safeStringListConversion(map['tactics_evolution']),
       escalationTimeline: map['escalation_timeline'] ?? '',
-      triggerEvents: List<String>.from(map['trigger_events'] ?? []),
+      triggerEvents: _safeStringListConversion(map['trigger_events']),
       patternSeverityScore: int.tryParse(map['pattern_severity_score'].toString()) ?? 0,
     );
   }
@@ -348,8 +360,8 @@ class PsychologicalAssessment {
     return PsychologicalAssessment(
       primaryAgenda: map['primary_agenda'] ?? '',
       emotionalDamageInflicted: map['emotional_damage_inflicted'] ?? '',
-      powerControlMethods: List<String>.from(map['power_control_methods'] ?? []),
-      empathyDeficitIndicators: List<String>.from(map['empathy_deficit_indicators'] ?? []),
+      powerControlMethods: _safeStringListConversion(map['power_control_methods']),
+      empathyDeficitIndicators: _safeStringListConversion(map['empathy_deficit_indicators']),
       realityDistortionLevel: int.tryParse(map['reality_distortion_level'].toString()) ?? 0,
       psychologicalDamageScore: int.tryParse(map['psychological_damage_score'].toString()) ?? 0,
     );
@@ -374,7 +386,7 @@ class RiskAssessment {
   factory RiskAssessment.fromMap(Map<String, dynamic> map) {
     return RiskAssessment(
       escalationProbability: int.tryParse(map['escalation_probability'].toString()) ?? 0,
-      safetyConcerns: List<String>.from(map['safety_concerns'] ?? []),
+      safetyConcerns: _safeStringListConversion(map['safety_concerns']),
       relationshipPrognosis: map['relationship_prognosis'] ?? '',
       futureBehaviorPrediction: map['future_behavior_prediction'] ?? '',
       interventionUrgency: map['intervention_urgency'] ?? '',
@@ -399,7 +411,7 @@ class StrategicRecommendations {
 
   factory StrategicRecommendations.fromMap(Map<String, dynamic> map) {
     return StrategicRecommendations(
-      patternDisruptionTactics: List<String>.from(map['pattern_disruption_tactics'] ?? []),
+      patternDisruptionTactics: _safeStringListConversion(map['pattern_disruption_tactics']),
       boundaryEnforcementStrategy: map['boundary_enforcement_strategy'] ?? '',
       communicationGuidelines: map['communication_guidelines'] ?? '',
       escapeStrategy: map['escape_strategy'] ?? '',

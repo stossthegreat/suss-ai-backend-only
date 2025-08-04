@@ -33,7 +33,7 @@ class _ComebacksTabState extends State<ComebacksTab> {
     });
 
     try {
-      // Use the new WHISPERFIRE comeback generation
+      // Use the WHISPERFIRE comeback generation
       final result = await ApiService.analyzeMessageWhisperfire(
         inputText: _textController.text.trim(),
         contentType: 'dm',
@@ -45,7 +45,11 @@ class _ComebacksTabState extends State<ComebacksTab> {
 
       if (mounted) {
         setState(() {
-          _generatedComeback = result.comebackResult?.primaryComeback ?? 'No comeback generated';
+          if (result.comebackResult != null) {
+            _generatedComeback = result.comebackResult!.primaryComeback;
+          } else {
+            _generatedComeback = 'No comeback generated';
+          }
         });
       }
     } catch (error) {
@@ -84,7 +88,7 @@ class _ComebacksTabState extends State<ComebacksTab> {
   @override
   void initState() {
     super.initState();
-    _generateComeback(); // Generate initial comeback like React
+    // Remove auto-generation - only generate when user clicks button
   }
 
   @override
@@ -186,7 +190,7 @@ class _ComebacksTabState extends State<ComebacksTab> {
                   setState(() {
                     _selectedTone = tone.id;
                   });
-                  _generateComeback(); // Auto-generate on selection
+                  // Remove auto-generation - only generate when user clicks button
                 },
                 child: Container(
                   height: 80, // Fixed height
@@ -289,7 +293,7 @@ class _ComebacksTabState extends State<ComebacksTab> {
                   setState(() {
                     _selectedRelationship = value;
                   });
-                  _generateComeback(); // Auto-generate on selection
+                  // Remove auto-generation - only generate when user clicks button
                 }
               },
             ),
@@ -333,7 +337,7 @@ class _ComebacksTabState extends State<ComebacksTab> {
                   setState(() {
                     _selectedStyle = style.id;
                   });
-                  _generateComeback(); // Auto-generate on selection
+                  // Remove auto-generation - only generate when user clicks button
                 },
                 child: Container(
                   height: 80, // Fixed height
