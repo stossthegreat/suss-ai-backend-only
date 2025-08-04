@@ -113,7 +113,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               // Bottom navigation
               BottomTabBar(
                 currentIndex: _currentIndex,
-                onTabTapped: _onTabTapped,
+                onTap: _onTabTapped,
               ),
             ],
           ),

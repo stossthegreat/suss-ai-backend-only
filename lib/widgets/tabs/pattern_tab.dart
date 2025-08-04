@@ -376,7 +376,7 @@ class _PatternTabState extends State<PatternTab> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textWhite,
           ),
         ),
         const SizedBox(height: 12),
@@ -468,7 +468,7 @@ class _PatternTabState extends State<PatternTab> {
                       Row(
                         children: [
                           Icon(
-                            Icons.story,
+                            Icons.article,
                             color: _selectedOutputStyle == 'narrative'
                                 ? AppColors.primaryCyan
                                 : AppColors.textSecondary,

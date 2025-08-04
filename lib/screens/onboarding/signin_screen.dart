@@ -214,20 +214,20 @@ class _SignInScreenState extends State<SignInScreen>
       children: [
         CustomOutlinedButton(
           text: 'Continue with Google',
-          onPressed: _isLoading ? null : _handleGoogleSignIn,
-          icon: const Icon(Icons.g_mobiledata, size: 24),
-          width: double.infinity,
-          height: 56,
+          onPressed: () {
+            // TODO: Implement Google sign-in
+            Navigator.pushNamed(context, '/paywall');
+          },
         ),
         
         const SizedBox(height: AppConstants.mediumSpacing),
         
         CustomOutlinedButton(
           text: 'Continue with Apple',
-          onPressed: _isLoading ? null : _handleAppleSignIn,
-          icon: const Icon(Icons.apple, size: 24),
-          width: double.infinity,
-          height: 56,
+          onPressed: () {
+            // TODO: Implement Apple sign-in
+            Navigator.pushNamed(context, '/paywall');
+          },
         ),
       ],
     );
