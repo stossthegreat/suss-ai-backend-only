@@ -20,6 +20,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late List<AnimationController> _tabAnimationControllers;
   int _currentIndex = 0;
   int _previousIndex = 0;
+  final List<TabItem> tabs = AppConstants.tabs;
 
   @override
   void initState() {

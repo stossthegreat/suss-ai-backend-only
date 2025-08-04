@@ -595,14 +595,14 @@ class _PatternTabState extends State<PatternTab> {
               ),
               items: AppConstants.models.map((model) {
                 return DropdownMenuItem<String>(
-                  value: model.id,
+                  value: model,
                   child: Row(
                     children: [
-                      Text(model.label),
+                      Text(model),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          model.desc,
+                          _getModelDescription(model),
                           style: TextStyle(
                             color: AppColors.textGray400,
                             fontSize: 12,
@@ -906,5 +906,20 @@ class _PatternTabState extends State<PatternTab> {
         ),
       ],
     );
+  }
+
+  String _getModelDescription(String model) {
+    switch (model) {
+      case 'gpt-4-turbo':
+        return 'The latest and most powerful model from OpenAI, capable of handling complex tasks and providing detailed insights.';
+      case 'gpt-3.5-turbo':
+        return 'A more affordable option, offering good performance for many use cases.';
+      case 'gpt-4-vision':
+        return 'A model that can process and understand images, making it ideal for tasks requiring visual input.';
+      case 'gpt-4-code':
+        return 'A model specialized in code generation and understanding, perfect for developers.';
+      default:
+        return 'A powerful AI model for pattern analysis.';
+    }
   }
 } 
