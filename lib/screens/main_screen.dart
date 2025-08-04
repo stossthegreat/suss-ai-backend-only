@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/colors.dart';
 import '../utils/constants.dart';
+import '../models/app_models.dart';
 import '../widgets/navigation/bottom_tab_bar.dart';
 import '../widgets/navigation/page_transition.dart';
 import '../widgets/tabs/scan_tab.dart';
