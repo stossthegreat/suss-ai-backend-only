@@ -26,6 +26,7 @@ class _PatternTabState extends State<PatternTab> {
   bool _isAnalyzing = false;
   WhisperfireResponse? _analysis;
   String _selectedOutputStyle = 'elite_intel'; // Default to Elite Intel Mode
+  String _selectedModel = 'gpt-4-turbo'; // Default to GPT-4 Turbo
 
   @override
   void initState() {
@@ -67,7 +68,8 @@ class _PatternTabState extends State<PatternTab> {
         analysisGoal: 'pattern_profiling',
         tone: 'clinical',
         relationship: _selectedRelationship,
-        outputStyle: _selectedOutputStyle, // Pass the selected output style
+        outputStyle: _selectedOutputStyle,
+        preferredModel: _selectedModel, // Pass the selected model
       );
 
       if (mounted) {
@@ -130,6 +132,10 @@ class _PatternTabState extends State<PatternTab> {
           
           // Output Style Selector
           _buildOutputStyleSelector(),
+          const SizedBox(height: 24),
+          
+          // Model Selector
+          _buildModelSelector(),
           const SizedBox(height: 24),
           
           // Analyze Button
@@ -553,6 +559,69 @@ class _PatternTabState extends State<PatternTab> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModelSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Model',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundGray800,
+            borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
+            border: Border.all(color: AppColors.borderGray600),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedModel,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              items: AppConstants.models.map((model) {
+                return DropdownMenuItem<String>(
+                  value: model.id,
+                  child: Row(
+                    children: [
+                      Text(model.label),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          model.desc,
+                          style: TextStyle(
+                            color: AppColors.textGray400,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedModel = value;
+                  });
+                }
+              },
+            ),
+          ),
         ),
       ],
     );

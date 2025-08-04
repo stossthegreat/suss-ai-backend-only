@@ -95,12 +95,14 @@ class ApiService {
     String? relationship,
     String? personName,
     String? stylePreference,
-    String? outputStyle, // Add output style parameter
+    String? outputStyle,
+    String? preferredModel, // Add model selection
   }) async {
     print('🚀 ApiService: Making WHISPERFIRE API call...');
     print('🚀 ApiService: URL: $baseUrl/analyze');
     print('🚀 ApiService: Analysis goal: $analysisGoal');
     print('🚀 ApiService: Output style: $outputStyle');
+    print('🚀 ApiService: Preferred model: $preferredModel');
     
     try {
       // For pattern profiling, split the input text into an array of messages
@@ -121,7 +123,8 @@ class ApiService {
         'relationship': relationship,
         'person_name': personName,
         'style_preference': stylePreference,
-        'output_style': outputStyle, // Include output style in request
+        'output_style': outputStyle,
+        'preferred_model': preferredModel, // Include model selection
       };
       
       print('📤 ApiService: Sending WHISPERFIRE request: ${jsonEncode(body)}');
