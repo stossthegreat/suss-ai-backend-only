@@ -3,6 +3,60 @@
 
 export class PatternProfilingWeapon {
 
+  // === RELATIONSHIP-BASED ARCHETYPE LIBRARY ===
+  private static readonly ARCHETYPES = {
+    Partner: {
+      Intel: ["Coercive Control Architect", "Dependency Cycle Engineer", "Intimacy Weaponizer"],
+      Narrative: ["The Velvet Cage Builder", "The Love-Bomb & Starve Operator", "The Romantic Disarmament Specialist"],
+      Roast: ["The Walking Red Flag Parade", "Netflix True-Crime Prequel", "Gaslight City Mayor"]
+    },
+    Ex: {
+      Intel: ["Post-Control Hoover Strategist", "Ego-Injury Avenger", "Unfinished Business Predator"],
+      Narrative: ["The Ghost Who Can't Let Go", "The Boomerang Saboteur", "The Unfinished War General"],
+      Roast: ["Back Like a Bad Sequel", "Stalker-ish Spotify Playlist Maker", "Emotional Spam Folder"]
+    },
+    Family: {
+      Intel: ["Generational Trauma Dealer", "Family Reputation Enforcer", "Legacy Loyalty Manipulator"],
+      Narrative: ["The Guilt-Trip Conductor", "The Crown of Conditional Love", "The Heirloom of Hurt"],
+      Roast: ["Thanksgiving Drama Director", "DNA But Make It Toxic", "Guilt-Trip Travel Agent"]
+    },
+    Friend: {
+      Intel: ["Social Leverage Broker", "Reputation Chess Player", "Alliance Disruptor"],
+      Narrative: ["The Shadow Cheerleader", "The Friendship Saboteur", "The Trust-Erosion Architect"],
+      Roast: ["Fake Smile Olympics Gold Medalist", "Group Chat Backstabber", "Bestie But Only in Selfies"]
+    },
+    Coworker: {
+      Intel: ["Corporate Sabotage Engineer", "Reputation-Risk Asset", "Career Landmine Layer"],
+      Narrative: ["The Breakroom Politician", "The Promotion Gatekeeper", "The Cubicle Spy"],
+      Roast: ["PowerPoint Pirate", "LinkedIn Lurker With a Grudge", "Passive-Aggressive Email Warrior"]
+    },
+    Date: {
+      Intel: ["Persona-Switch Seducer", "Boundary Pressure Tester", "Fast-Bond Exploiter"],
+      Narrative: ["The Candlelight Chameleon", "The Date Who Mirrors Your Soul Until They Own It", "The Future-Faking Showman"],
+      Roast: ["Walking Dating App Red Flag", "Love-Bomb Speedrunner", "Charm Offensive Dropout"]
+    },
+    Roommate: {
+      Intel: ["Boundary Violation Specialist", "Passive-Aggressive Controller", "Shared Space Saboteur"],
+      Narrative: ["The Silent Treatment Master", "The Passive-Aggressive Note Leaver", "The Shared Space Tyrant"],
+      Roast: ["Passive-Aggressive Post-It Note Artist", "Silent Treatment Olympic Champion", "Shared Fridge Dictator"]
+    },
+    Stranger: {
+      Intel: ["Fast-Bond Exploiter", "Trust Grooming Specialist", "Red Flag Distributor"],
+      Narrative: ["The Charming Predator", "The Trust Vampire", "The Red Flag Salesman"],
+      Roast: ["Walking Red Flag Parade", "Trust Vampire in Disguise", "Charm Offensive Dropout"]
+    },
+    Boss: {
+      Intel: ["Power Abuse Architect", "Career Sabotage Specialist", "HR-Proof Bully"],
+      Narrative: ["The Promotion Gatekeeper", "The Corporate Gaslighter", "The Power Trip Conductor"],
+      Roast: ["Power Trip Conductor", "Corporate Gaslighter Extraordinaire", "Promotion Gatekeeper Supreme"]
+    },
+    Acquaintance: {
+      Intel: ["Social Leverage Player", "Reputation Game Master", "Boundary Tester"],
+      Narrative: ["The Social Spy", "The Reputation Chess Player", "The Casual Manipulator"],
+      Roast: ["Social Spy Extraordinaire", "Reputation Chess Master", "Casual Manipulation Artist"]
+    }
+  };
+
   // 🔬 PATTERN.AI — BEHAVIORAL STRATEGIST + FORENSIC PROFILER
   private static readonly PATTERN_CORE = `
 You are **PATTERN.AI** — the world's most advanced behavioral profiler and psychological pattern detection engine.
@@ -35,7 +89,8 @@ ALL OUTPUT MUST BE CLEAN JSON. NO EXPLANATIONS. JUST SURVIVAL-LEVEL CLARITY.
   static buildPatternPrompt(
     messages: string[],
     relationship: string,
-    tone: string,
+    outputMode: "Intel" | "Narrative" | "Roast" = "Intel",
+    tone: string = "clinical",
     personName?: string
   ): string {
     const messageTimeline = messages
@@ -45,6 +100,13 @@ ALL OUTPUT MUST BE CLEAN JSON. NO EXPLANATIONS. JUST SURVIVAL-LEVEL CLARITY.
     const specialization = this.getRelationshipSpecialization(relationship);
     const toneInstructions = this.getToneInstructions(tone);
     const nameContext = personName ? `\nSUBJECT NAME: "${personName}" — personalize the psychological profile accordingly.` : '';
+    
+    // Pick archetype dynamically
+    const archetypeList = this.ARCHETYPES[relationship as keyof typeof this.ARCHETYPES]?.[outputMode] || [];
+    const chosenArchetype = archetypeList[Math.floor(Math.random() * archetypeList.length)] || "Unknown Pattern";
+    
+    // Build specialized mission
+    const modeFlavor = this.getModeFlavor(outputMode, chosenArchetype);
 
     return `${this.PATTERN_CORE}
 
@@ -61,6 +123,7 @@ RELATIONSHIP: ${relationship.toUpperCase()}
 ${specialization}
 ${nameContext}
 ${toneInstructions}
+${modeFlavor}
 
 🧾 MESSAGE TIMELINE:
 ${messageTimeline}
@@ -69,7 +132,7 @@ Return ONLY this JSON format:
 {
   "behavioral_profile": {
     "headline": "🔥 One-line viral diagnosis of their psychological game",
-    "manipulator_archetype": "👑 Psychological persona (e.g. Narcissistic Overcontroller)",
+    "manipulator_archetype": "${chosenArchetype}",
     "dominant_pattern": "🔄 Recurring behavioral cycle",
     "manipulation_sophistication": 0-100
   },
@@ -131,6 +194,29 @@ Return ONLY this JSON format:
 `;
   }
 
+  // === MODE FLAVORING ===
+  private static getModeFlavor(mode: "Intel" | "Narrative" | "Roast", archetype: string): string {
+    if (mode === "Intel") {
+      return `🎯 OUTPUT MODE: INTEL
+- Speak like a classified threat brief.
+- Focus on tactics, escalation, and control systems.
+- Archetype: "${archetype}"`;
+    }
+    if (mode === "Narrative") {
+      return `🎯 OUTPUT MODE: NARRATIVE
+- Speak like a Netflix true-crime narrator.
+- Unfold the pattern like a story arc.
+- Archetype: "${archetype}"`;
+    }
+    if (mode === "Roast") {
+      return `🎯 OUTPUT MODE: ROAST
+- Socially lethal but truthful.
+- Make it shareable & meme-worthy.
+- Archetype: "${archetype}"`;
+    }
+    return "";
+  }
+
   // 🧠 RELATIONSHIP SPECIALIZATION
   private static getRelationshipSpecialization(relationship: string): string {
     const specs = {
@@ -165,7 +251,31 @@ WORKPLACE FOCUS:
       'Date': `
 DATING FOCUS:
 - Spot fast-seduction, boundary testing, and persona-switching
-- Detect grooming, mirroring, and discard-risk triggers`
+- Detect grooming, mirroring, and discard-risk triggers`,
+
+      'Roommate': `
+LIVING SITUATION FOCUS:
+- Detect boundary violations and passive-aggressive control
+- Map power dynamics in shared living spaces
+- Identify covert sabotage and emotional manipulation`,
+
+      'Stranger': `
+UNKNOWN PERSON FOCUS:
+- Detect grooming, fast-bonding, and trust exploitation
+- Map manipulation tactics from limited interaction
+- Identify red flags in brief encounters`,
+
+      'Boss': `
+AUTHORITY FIGURE FOCUS:
+- Detect power abuse and career manipulation
+- Map workplace bullying and reputation sabotage
+- Identify HR-proof control tactics`,
+
+      'Acquaintance': `
+CASUAL CONTACT FOCUS:
+- Detect social leverage and reputation games
+- Map subtle manipulation in casual relationships
+- Identify boundary testing and trust exploitation`
     };
 
     return specs[relationship as keyof typeof specs] || specs.Friend;
@@ -174,12 +284,6 @@ DATING FOCUS:
   // 🎨 TONE INSTRUCTION SYSTEM
   private static getToneInstructions(tone: string): string {
     const tones = {
-      'brutal': `
-TONE: BRUTAL
-- Use sharp, clinical truth — no sugarcoating
-- Prioritize clarity over comfort
-- Call out escalation risk in plain terms`,
-
       'clinical': `
 TONE: CLINICAL
 - Objective psychological language
@@ -190,7 +294,19 @@ TONE: CLINICAL
 TONE: SOFT
 - Gentle but clear
 - Validate pain without overwhelming
-- Focus on safety, hope, and empowerment`
+- Focus on safety, hope, and empowerment`,
+
+      'mature': `
+TONE: MATURE
+- Balanced and credible
+- Culturally sharp and nuanced
+- Focus on wisdom and perspective`,
+
+      'savage': `
+TONE: SAVAGE
+- Direct and unapologetic
+- Truthful but cutting
+- Focus on reality checks and wake-up calls`
     };
 
     return tones[tone as keyof typeof tones] || tones.clinical;
