@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { PatternController } from './controllers/patternController';
+import { StripeController } from './controllers/stripeController';
 
 const app = express();
 const PORT = process.env['PORT'] || 3000;
@@ -10,9 +11,16 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Pattern Analysis Routes
 app.post('/api/v1/analyze', PatternController.analyzePattern);
 app.get('/api/v1/health', PatternController.healthCheck);
+
+// Stripe Routes
+app.post('/api/v1/stripe/create-customer', StripeController.createCustomer);
+app.post('/api/v1/stripe/create-checkout-session', StripeController.createCheckoutSession);
+app.get('/api/v1/stripe/subscription/:subscriptionId', StripeController.getSubscription);
+app.delete('/api/v1/stripe/subscription/:subscriptionId', StripeController.cancelSubscription);
+app.post('/api/v1/stripe/webhook', StripeController.handleWebhook);
 
 // Error handling middleware
 app.use((error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -29,6 +37,7 @@ app.listen(PORT, () => {
   console.log(`🧠 Pattern.AI - Behavioral Intelligence System`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/v1/health`);
   console.log(`🔍 Pattern analysis: POST http://localhost:${PORT}/api/v1/analyze`);
+  console.log(`💳 Stripe integration: /api/v1/stripe/*`);
 });
 
 export default app; 

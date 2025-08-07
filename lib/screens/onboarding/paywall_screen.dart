@@ -4,6 +4,8 @@ import '../../utils/constants.dart';
 import '../../utils/glassmorphism.dart';
 import '../../widgets/common/gradient_button.dart';
 import '../../widgets/common/result_card.dart';
+import '../../services/stripe_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -30,8 +32,9 @@ class _PaywallScreenState extends State<PaywallScreen>
       id: 'monthly',
       title: 'Monthly Plan',
       price: '\$7.99',
+      priceId: 'price_monthly', // Stripe price ID
       originalPrice: null,
-      description: 'Perfect for trying MySnitch AI',
+      description: 'Perfect for trying SUSS AI',
       features: ['Unlimited scans', 'All analysis types', 'Priority support'],
       popular: false,
     ),
@@ -39,6 +42,7 @@ class _PaywallScreenState extends State<PaywallScreen>
       id: 'annual',
       title: 'Annual Plan',
       price: '\$69.99',
+      priceId: 'price_annual', // Stripe price ID
       originalPrice: '\$95.88',
       description: 'Save 30% - Best value',
       features: ['Everything in monthly', 'Early access to features', 'Premium support'],
@@ -113,11 +117,57 @@ class _PaywallScreenState extends State<PaywallScreen>
     if (_selectedPlan == null) return;
     
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
     
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/main');
+    try {
+      // Get the selected plan
+      final selectedPlan = _plans.firstWhere((plan) => plan.id == _selectedPlan);
+      
+      // Create customer (you'll need to get user email from somewhere)
+      final customerResponse = await StripeService.createCustomer(
+        email: 'user@example.com', // Replace with actual user email
+        name: 'User Name', // Replace with actual user name
+      );
+      
+      if (customerResponse['success'] == true) {
+        final customerId = customerResponse['customerId'];
+        
+        // Create checkout session
+        final sessionResponse = await StripeService.createCheckoutSession(
+          customerId: customerId,
+          priceId: selectedPlan.priceId,
+          successUrl: 'https://your-app.com/success',
+          cancelUrl: 'https://your-app.com/cancel',
+        );
+        
+        if (sessionResponse['success'] == true) {
+          final checkoutUrl = sessionResponse['url'];
+          
+          // Launch Stripe checkout
+          if (await canLaunchUrl(Uri.parse(checkoutUrl))) {
+            await launchUrl(Uri.parse(checkoutUrl));
+          } else {
+            throw Exception('Could not launch checkout URL');
+          }
+        } else {
+          throw Exception('Failed to create checkout session');
+        }
+      } else {
+        throw Exception('Failed to create customer');
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: $e'),
+            backgroundColor: AppColors.dangerRed,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -434,6 +484,7 @@ class PlanOption {
   final String description;
   final List<String> features;
   final bool popular;
+  final String priceId; // Added for Stripe integration
 
   PlanOption({
     required this.id,
@@ -443,5 +494,6 @@ class PlanOption {
     required this.description,
     required this.features,
     required this.popular,
+    required this.priceId, // Added for Stripe integration
   });
 } 

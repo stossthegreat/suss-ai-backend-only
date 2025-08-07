@@ -31,9 +31,9 @@ class _PatternTabState extends State<PatternTab> {
     _addMessage();
     // Add listener to first controller
     if (_messageControllers.isNotEmpty) {
-      _messageControllers[0].addListener(() {
-        setState(() {}); // Rebuild to update button state
-      });
+    _messageControllers[0].addListener(() {
+      setState(() {}); // Rebuild to update button state
+    });
     }
   }
 
@@ -443,9 +443,9 @@ class _PatternTabState extends State<PatternTab> {
                       width: 2,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
                       Row(
                         children: [
                           Icon(
@@ -481,21 +481,21 @@ class _PatternTabState extends State<PatternTab> {
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+                Expanded(
               child: GestureDetector(
-                onTap: () {
+                  onTap: () {
                   setState(() {
                     _selectedOutputMode = 'Narrative';
                   });
-                },
-                child: Container(
+                  },
+                  child: Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                     color: _selectedOutputMode == 'Narrative'
                         ? AppColors.primaryCyan.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
+                      border: Border.all(
                       color: _selectedOutputMode == 'Narrative'
                           ? AppColors.primaryCyan
                           : AppColors.borderGray600,
@@ -506,8 +506,8 @@ class _PatternTabState extends State<PatternTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        children: [
-                          Icon(
+                      children: [
+                        Icon(
                             Icons.article,
                             color: _selectedOutputMode == 'Narrative'
                                 ? AppColors.primaryCyan
@@ -515,9 +515,9 @@ class _PatternTabState extends State<PatternTab> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                        Text(
                             'Narrative',
-                            style: TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _selectedOutputMode == 'Narrative'
                                   ? AppColors.primaryCyan
@@ -532,9 +532,9 @@ class _PatternTabState extends State<PatternTab> {
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
                   ),
                 ),
               ),
@@ -549,23 +549,23 @@ class _PatternTabState extends State<PatternTab> {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
+      decoration: BoxDecoration(
                     color: _selectedOutputMode == 'Roast'
                         ? AppColors.warningOrange.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
+        border: Border.all(
                       color: _selectedOutputMode == 'Roast'
                           ? AppColors.warningOrange
                           : AppColors.borderGray600,
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
+          width: 2,
+        ),
+      ),
+      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        children: [
+        children: [
                           Icon(
                             Icons.local_fire_department,
                             color: _selectedOutputMode == 'Roast'
@@ -574,27 +574,27 @@ class _PatternTabState extends State<PatternTab> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          Text(
+          Text(
                             'Roast',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
                               color: _selectedOutputMode == 'Roast'
                                   ? AppColors.warningOrange
                                   : AppColors.textWhite,
-                            ),
+            ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
+          ),
+          const SizedBox(height: 4),
+          Text(
                         'Viral & savage',
-                        style: TextStyle(
+            style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
-                        ),
-                      ),
-                    ],
-                  ),
+            ),
+          ),
+        ],
+      ),
                 ),
               ),
             ),
