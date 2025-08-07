@@ -1,4 +1,5 @@
 import { OpenAIConfig } from '../config/openai';
+import { TogetherAIConfig } from '../config/togetherAI';
 import { GodPromptSystem } from '../prompts/godPrompt';
 import { ScanInsightEngine } from '../prompts/whisperfireScan';
 import { ComebackViralWeapon } from '../prompts/whisperfireComeback';
@@ -10,10 +11,12 @@ import { createHash } from 'crypto';
 
 export class SussAIEngine {
   private openai: OpenAIConfig;
+  private togetherAI: TogetherAIConfig;
   private cache: Map<string, any> = new Map();
 
   constructor() {
     this.openai = new OpenAIConfig();
+    this.togetherAI = new TogetherAIConfig();
   }
 
   async analyzeContent(request: AnalysisRequest | LegendaryAnalysisRequest): Promise<{
@@ -118,8 +121,19 @@ export class SussAIEngine {
     const startTime = Date.now();
     
     // 🚀 Smart model selection for WHISPERFIRE
-    const model = this.openai.selectModel(request);
-    logger.info(`Using WHISPERFIRE model: ${model} for ${request.analysis_goal}`);
+    let model: string;
+    let client: any;
+    
+    // Check if user wants to use DeepSeek v3 via TogetherAI
+    if (request.preferred_model === 'deepseek-v3') {
+      model = this.togetherAI.selectModel(request);
+      client = this.togetherAI.getTogetherAIClient();
+      logger.info(`Using TogetherAI DeepSeek v3: ${model} for ${request.analysis_goal}`);
+    } else {
+      model = this.openai.selectModel(request);
+      client = this.openai.getOpenAIClient();
+      logger.info(`Using OpenAI model: ${model} for ${request.analysis_goal}`);
+    }
 
     // 🔥 Build WHISPERFIRE prompt based on analysis goal
     let prompt: string;
@@ -172,10 +186,10 @@ export class SussAIEngine {
       };
     }
 
-    // 🚀 Call OpenAI with WHISPERFIRE prompt
+    // 🚀 Call AI with WHISPERFIRE prompt
     let rawResponse: string;
     try {
-      const completion = await this.openai.getOpenAIClient().chat.completions.create({
+      const completion = await client.chat.completions.create({
         model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.4, // Slightly higher for WHISPERFIRE creativity
@@ -184,12 +198,12 @@ export class SussAIEngine {
 
       rawResponse = completion.choices[0]?.message?.content || '';
     } catch (error) {
-      logger.warn('OpenAI call failed, returning mock WHISPERFIRE response for testing');
+      logger.warn('AI call failed, returning mock WHISPERFIRE response for testing');
       rawResponse = this.generateMockWhisperfireResponse(request);
     }
 
     if (!rawResponse) {
-      throw new Error('No response from OpenAI');
+      throw new Error('No response from AI');
     }
 
     // 🧪 Parse WHISPERFIRE JSON response
