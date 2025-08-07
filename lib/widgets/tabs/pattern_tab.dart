@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
-import '../../utils/mock_data.dart';
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
-import '../common/outlined_button.dart';
 import '../common/result_card.dart';
-import '../common/loading_spinner.dart';
-import '../common/watermark_stamp.dart';
 import '../../services/api_service.dart';
 import '../../models/whisperfire_models.dart';
-import 'package:flutter/services.dart';
 
 class PatternTab extends StatefulWidget {
   const PatternTab({super.key});
@@ -20,21 +15,26 @@ class PatternTab extends StatefulWidget {
 }
 
 class _PatternTabState extends State<PatternTab> {
-  final List<TextEditingController> _messageControllers = [TextEditingController()];
-  String _selectedRelationship = 'Partner';
+  final List<TextEditingController> _messageControllers = [];
   final TextEditingController _nameController = TextEditingController();
-  bool _isAnalyzing = false;
+  String _selectedRelationship = 'Partner';
+  String _selectedOutputMode = 'Intel';
+  String _selectedTone = 'clinical';
+  String _selectedModel = 'gpt-4-turbo';
   WhisperfireResponse? _analysis;
-  String _selectedOutputStyle = 'elite_intel'; // Default to Elite Intel Mode
-  String _selectedModel = 'gpt-4-turbo'; // Default to GPT-4 Turbo
+  bool _isAnalyzing = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with first message controller
+    _addMessage();
     // Add listener to first controller
-    _messageControllers[0].addListener(() {
-      setState(() {}); // Rebuild to update button state
-    });
+    if (_messageControllers.isNotEmpty) {
+      _messageControllers[0].addListener(() {
+        setState(() {}); // Rebuild to update button state
+      });
+    }
   }
 
   @override
@@ -47,13 +47,21 @@ class _PatternTabState extends State<PatternTab> {
   }
 
   Future<void> _runPatternAnalysis() async {
+    print('Pattern Tab: _runPatternAnalysis() called!');
+    
     // Get all valid messages
     final messages = _messageControllers
         .map((controller) => controller.text.trim())
         .where((text) => text.isNotEmpty)
         .toList();
 
-    if (messages.isEmpty) return;
+    print('Pattern Tab: Valid messages found: ${messages.length}');
+    print('Pattern Tab: Messages: $messages');
+
+    if (messages.isEmpty) {
+      print('Pattern Tab: No valid messages, returning early');
+      return;
+    }
 
     setState(() {
       _isAnalyzing = true;
@@ -66,20 +74,29 @@ class _PatternTabState extends State<PatternTab> {
         inputText: messages.join('\n'),
         contentType: 'dm',
         analysisGoal: 'pattern_profiling',
-        tone: 'clinical',
         relationship: _selectedRelationship,
-        outputStyle: _selectedOutputStyle,
-        preferredModel: _selectedModel, // Pass the selected model
+        outputStyle: _selectedOutputMode.toLowerCase(),
+        tone: _selectedTone.toLowerCase(),
+        preferredModel: _selectedModel,
       );
+
+      print('Pattern Tab: API call successful!');
+      print('Pattern Tab: Result type: ${result.runtimeType}');
+      print('Pattern Tab: Result patternResult is null: ${result.patternResult == null}');
+      if (result.patternResult != null) {
+        print('Pattern Tab: Pattern result headline: ${result.patternResult!.behavioralProfile.headline}');
+        print('Pattern Tab: Pattern result archetype: ${result.patternResult!.behavioralProfile.manipulatorArchetype}');
+      }
 
       if (mounted) {
         setState(() {
           _analysis = result;
           _isAnalyzing = false;
         });
+        print('Pattern Tab: Set _analysis to result');
       }
     } catch (error) {
-      print('❌ Pattern analysis failed: $error');
+      print('Pattern analysis failed: $error');
       if (mounted) {
         setState(() {
           _isAnalyzing = false;
@@ -134,6 +151,14 @@ class _PatternTabState extends State<PatternTab> {
           _buildOutputStyleSelector(),
           const SizedBox(height: 24),
           
+          // Output Mode Selector
+          _buildOutputModeSelector(),
+          const SizedBox(height: 24),
+          
+          // Tone Selector
+          _buildToneSelector(),
+          const SizedBox(height: 24),
+          
           // Model Selector
           _buildModelSelector(),
           const SizedBox(height: 24),
@@ -143,7 +168,7 @@ class _PatternTabState extends State<PatternTab> {
           const SizedBox(height: 24),
           
           // Pattern Results
-          if (_analysis != null) _buildPatternResults(),
+          if (_analysis != null && _analysis!.patternResult != null) _buildPatternResults(),
           
           const SizedBox(height: 100), // Bottom padding for tab bar
         ],
@@ -156,13 +181,27 @@ class _PatternTabState extends State<PatternTab> {
     return Column(
       children: [
         const SizedBox(height: 16),
-        const Text(
-          '🧩 Pattern Scan',
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.compare_arrows,
+              color: AppColors.primaryPurple,
+              size: 32,
+            ),
+            const SizedBox(width: 8),
+            ShaderMask(
+              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              child: const Text(
+                'MySnitch AI',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+                  fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(
@@ -372,11 +411,12 @@ class _PatternTabState extends State<PatternTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Output Style',
+          'OUTPUT STYLE',
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textWhite,
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: 12),
@@ -386,18 +426,18 @@ class _PatternTabState extends State<PatternTab> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedOutputStyle = 'elite_intel';
+                    _selectedOutputMode = 'Intel';
                   });
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _selectedOutputStyle == 'elite_intel'
+                    color: _selectedOutputMode == 'Intel'
                         ? AppColors.primaryPink.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _selectedOutputStyle == 'elite_intel'
+                      color: _selectedOutputMode == 'Intel'
                           ? AppColors.primaryPink
                           : AppColors.borderGray600,
                       width: 2,
@@ -410,17 +450,17 @@ class _PatternTabState extends State<PatternTab> {
                         children: [
                           Icon(
                             Icons.security,
-                            color: _selectedOutputStyle == 'elite_intel'
+                            color: _selectedOutputMode == 'Intel'
                                 ? AppColors.primaryPink
                                 : AppColors.textGray400,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Elite Intel',
+                            'Intel',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: _selectedOutputStyle == 'elite_intel'
+                              color: _selectedOutputMode == 'Intel'
                                   ? AppColors.primaryPink
                                   : AppColors.textWhite,
                             ),
@@ -429,7 +469,7 @@ class _PatternTabState extends State<PatternTab> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Professional analysis',
+                        'Tactical analysis',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
@@ -445,18 +485,18 @@ class _PatternTabState extends State<PatternTab> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedOutputStyle = 'narrative';
+                    _selectedOutputMode = 'Narrative';
                   });
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _selectedOutputStyle == 'narrative'
+                    color: _selectedOutputMode == 'Narrative'
                         ? AppColors.primaryCyan.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _selectedOutputStyle == 'narrative'
+                      color: _selectedOutputMode == 'Narrative'
                           ? AppColors.primaryCyan
                           : AppColors.borderGray600,
                       width: 2,
@@ -469,7 +509,7 @@ class _PatternTabState extends State<PatternTab> {
                         children: [
                           Icon(
                             Icons.article,
-                            color: _selectedOutputStyle == 'narrative'
+                            color: _selectedOutputMode == 'Narrative'
                                 ? AppColors.primaryCyan
                                 : AppColors.textGray400,
                             size: 20,
@@ -479,7 +519,7 @@ class _PatternTabState extends State<PatternTab> {
                             'Narrative',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: _selectedOutputStyle == 'narrative'
+                              color: _selectedOutputMode == 'Narrative'
                                   ? AppColors.primaryCyan
                                   : AppColors.textWhite,
                             ),
@@ -488,7 +528,7 @@ class _PatternTabState extends State<PatternTab> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Story-driven insights',
+                        'Story-driven',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
@@ -504,18 +544,18 @@ class _PatternTabState extends State<PatternTab> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedOutputStyle = 'roast';
+                    _selectedOutputMode = 'Roast';
                   });
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _selectedOutputStyle == 'roast'
+                    color: _selectedOutputMode == 'Roast'
                         ? AppColors.warningOrange.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _selectedOutputStyle == 'roast'
+                      color: _selectedOutputMode == 'Roast'
                           ? AppColors.warningOrange
                           : AppColors.borderGray600,
                       width: 2,
@@ -528,7 +568,7 @@ class _PatternTabState extends State<PatternTab> {
                         children: [
                           Icon(
                             Icons.local_fire_department,
-                            color: _selectedOutputStyle == 'roast'
+                            color: _selectedOutputMode == 'Roast'
                                 ? AppColors.warningOrange
                                 : AppColors.textGray400,
                             size: 20,
@@ -538,7 +578,7 @@ class _PatternTabState extends State<PatternTab> {
                             'Roast',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: _selectedOutputStyle == 'roast'
+                              color: _selectedOutputMode == 'Roast'
                                   ? AppColors.warningOrange
                                   : AppColors.textWhite,
                             ),
@@ -547,7 +587,7 @@ class _PatternTabState extends State<PatternTab> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Viral & entertaining',
+                        'Viral & savage',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
@@ -564,53 +604,140 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
-  Widget _buildModelSelector() {
+  // OUTPUT MODE SELECTOR
+  Widget _buildOutputModeSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Model',
+          'OUTPUT STYLE',
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
             color: AppColors.backgroundGray800,
-            borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
-            border: Border.all(color: AppColors.borderGray600),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: _selectedModel,
+              value: _selectedOutputMode,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+          style: const TextStyle(
+            color: Colors.white,
+                fontSize: 16,
+              ),
+              items: AppConstants.outputModes.map((mode) {
+                return DropdownMenuItem<String>(
+                  value: mode,
+                  child: Text(mode),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedOutputMode = value;
+                  });
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // TONE SELECTOR - Updated to match new backend prompts
+  Widget _buildToneSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'TONE STYLE',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
+            color: AppColors.backgroundGray800,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedTone,
               isExpanded: true,
               dropdownColor: AppColors.backgroundGray800,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
               ),
+              items: AppConstants.toneOptions.map((tone) {
+                return DropdownMenuItem<String>(
+                  value: tone,
+                  child: Text(tone),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedTone = value;
+                  });
+                }
+              },
+            ),
+            ),
+          ),
+        ],
+    );
+  }
+
+  // MODEL SELECTOR
+  Widget _buildModelSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'AI MODEL',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
+            color: AppColors.backgroundGray800,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedModel,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+              ),
               items: AppConstants.models.map((model) {
                 return DropdownMenuItem<String>(
                   value: model,
-                  child: Row(
-                    children: [
-                      Text(model),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _getModelDescription(model),
-                          style: TextStyle(
-                            color: AppColors.textGray400,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: Text(model),
                 );
               }).toList(),
               onChanged: (value) {
@@ -627,41 +754,83 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
+  // ANALYZE BUTTON
   Widget _buildAnalyzeButton() {
-    // Debug logging
-    print('🔍 Pattern Tab Debug:');
-    print('  - Valid message count: $_validMessageCount');
-    print('  - Total controllers: ${_messageControllers.length}');
-    print('  - Button disabled: ${_validMessageCount < 2}');
-    print('  - Is analyzing: $_isAnalyzing');
-    
-    // ✅ REUSED: GradientButton from Phase 3 with custom purple gradient
     return GradientButton(
-      text: _isAnalyzing ? 'Analyzing pattern...' : 'Analyze Communication Pattern',
+      text: _isAnalyzing ? 'Analyzing...' : 'Analyze Communication Pattern',
       isLoading: _isAnalyzing,
       disabled: _validMessageCount < 2, // Must have 2+ messages like React
-      icon: _isAnalyzing ? null : const Text('🔍', style: TextStyle(fontSize: 18)),
+      icon: _isAnalyzing ? null : const Icon(Icons.search, size: 18),
       width: double.infinity,
       height: 56,
-      // ✅ Custom gradient: Purple to Pink (different from scan/comebacks)
+      // Custom gradient: Purple to Pink (different from scan/comebacks)
       gradient: const LinearGradient(
         colors: [AppColors.primaryPurple, AppColors.primaryPink],
       ),
-      onPressed: () {
-        print('🔍 Pattern Tab: Button pressed!');
-        print('🔍 Pattern Tab: Valid messages: $_validMessageCount');
-        _runPatternAnalysis();
+      onPressed: () async {
+        print('Pattern Tab: Button pressed!');
+        print('Pattern Tab: Valid messages: $_validMessageCount');
+        
+        // Get all valid messages
+        final messages = _messageControllers
+            .map((controller) => controller.text.trim())
+            .where((text) => text.isNotEmpty)
+            .toList();
+
+        if (messages.isEmpty) return;
+
+        setState(() {
+          _isAnalyzing = true;
+          _analysis = null;
+        });
+
+        try {
+          print('Pattern Tab: Direct API call...');
+          final result = await ApiService.analyzeMessageWhisperfire(
+            inputText: messages.join('\n'),
+            contentType: 'dm',
+            analysisGoal: 'pattern_profiling',
+            relationship: _selectedRelationship,
+            outputStyle: _selectedOutputMode.toLowerCase(),
+            tone: _selectedTone.toLowerCase(),
+            preferredModel: _selectedModel,
+          );
+
+          print('Pattern Tab: Direct API call successful!');
+          print('Pattern Tab: Result type: ${result.runtimeType}');
+          print('Pattern Tab: Result patternResult is null: ${result.patternResult == null}');
+          if (result.patternResult != null) {
+            print('Pattern Tab: Pattern result headline: ${result.patternResult!.behavioralProfile.headline}');
+          }
+
+          if (mounted) {
+            setState(() {
+              _analysis = result;
+              _isAnalyzing = false;
+            });
+            print('Pattern Tab: Set _analysis to result');
+          }
+        } catch (error) {
+          print('Pattern Tab: Direct API call failed: $error');
+          if (mounted) {
+            setState(() {
+              _isAnalyzing = false;
+            });
+          }
+        }
       },
     );
   }
 
-  // ✅ PATTERN RESULTS - Premium Design
+  // 🧠 PATTERN RESULTS - Comprehensive Behavioral Intelligence Report
   Widget _buildPatternResults() {
+    final patternResult = _analysis!.patternResult!;
+    
     return ResultCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Premium Header with Share Button
+          // Header with Intelligence Theme
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(bottom: 20),
@@ -676,14 +845,27 @@ class _PatternTabState extends State<PatternTab> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Communication Pattern Analysis',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '⚡ PATTERN.AI - BEHAVIORAL INTELLIGENCE REPORT',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Advanced Psychological Threat Analysis',
+                        style: TextStyle(
+                          color: AppColors.textGray400,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -733,25 +915,100 @@ class _PatternTabState extends State<PatternTab> {
           ),
           const SizedBox(height: 24),
           
-          // Pattern Risk Score - Prominent Display
-          _buildPatternScoreSection(),
-          const SizedBox(height: 24),
-          
-          // Viral Insights
-          _buildPremiumPatternSection(
-            '🔥 VIRAL INSIGHTS',
-            _analysis!.patternResult!.viralInsights.sussVerdict,
-            AppColors.primaryCyan,
+          // Behavioral Profile Section
+          _buildIntelligenceSection(
+            '🎭 BEHAVIORAL PROFILE',
+            [
+              'Headline: "${patternResult.behavioralProfile.headline}"',
+              'Archetype: "${patternResult.behavioralProfile.manipulatorArchetype}"',
+              'Dominant Pattern: "${patternResult.behavioralProfile.dominantPattern}"',
+              'Sophistication Level: ${patternResult.behavioralProfile.manipulationSophistication}/100',
+            ],
+            AppColors.primaryPink,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          // Life Saving Insight
-          _buildPremiumPatternSection(
-            '💡 LIFE SAVING INSIGHT',
-            _analysis!.patternResult!.viralInsights.lifeSavingInsight,
+          // Pattern Analysis Section
+          _buildIntelligenceSection(
+            '🔄 PATTERN ANALYSIS',
+            [
+              'Manipulation Cycle: "${patternResult.patternAnalysis.manipulationCycle}"',
+              'Pattern Severity: ${patternResult.patternAnalysis.patternSeverityScore}/100',
+              'Escalation Timeline: "${patternResult.patternAnalysis.escalationTimeline}"',
+              'Trigger Events: ${patternResult.patternAnalysis.triggerEvents.length} identified',
+            ],
+            AppColors.primaryPurple,
+          ),
+          const SizedBox(height: 20),
+          
+          // Psychological Assessment Section
+          _buildIntelligenceSection(
+            '🧠 PSYCHOLOGICAL ASSESSMENT',
+            [
+              'Primary Agenda: "${patternResult.psychologicalAssessment.primaryAgenda}"',
+              'Emotional Damage: "${patternResult.psychologicalAssessment.emotionalDamageInflicted}"',
+              'Reality Distortion: ${patternResult.psychologicalAssessment.realityDistortionLevel}%',
+              'Psychological Damage Score: ${patternResult.psychologicalAssessment.psychologicalDamageScore}/100',
+            ],
+            AppColors.warningOrange,
+          ),
+          const SizedBox(height: 20),
+          
+          // Risk Assessment Section
+          _buildIntelligenceSection(
+            '🚨 RISK ASSESSMENT',
+            [
+              'Escalation Probability: ${patternResult.riskAssessment.escalationProbability}%',
+              'Intervention Urgency: ${patternResult.riskAssessment.interventionUrgency}',
+              'Relationship Prognosis: "${patternResult.riskAssessment.relationshipPrognosis}"',
+              'Future Behavior: "${patternResult.riskAssessment.futureBehaviorPrediction}"',
+            ],
+            AppColors.dangerRed,
+          ),
+          const SizedBox(height: 20),
+          
+          // Strategic Recommendations Section
+          _buildIntelligenceSection(
+            '🛡️ STRATEGIC RECOMMENDATIONS',
+            [
+              'Boundary Strategy: "${patternResult.strategicRecommendations.boundaryEnforcementStrategy}"',
+              'Communication Guidelines: "${patternResult.strategicRecommendations.communicationGuidelines}"',
+              'Escape Strategy: "${patternResult.strategicRecommendations.escapeStrategy}"',
+              'Safety Planning: "${patternResult.strategicRecommendations.safetyPlanning}"',
+            ],
             AppColors.successGreen,
           ),
           const SizedBox(height: 20),
+          
+          // Viral Insights Section
+          _buildIntelligenceSection(
+            '🔥 VIRAL INSIGHTS',
+            [
+              'Suss Verdict: "${patternResult.viralInsights.sussVerdict}"',
+              'Life-Saving Insight: "${patternResult.viralInsights.lifeSavingInsight}"',
+              'Pattern Summary: "${patternResult.viralInsights.patternSummary}"',
+              'Gut Validation: "${patternResult.viralInsights.gutValidation}"',
+            ],
+            AppColors.primaryCyan,
+          ),
+          const SizedBox(height: 20),
+          
+          // Confidence Metrics Section
+          _buildIntelligenceSection(
+            '📊 CONFIDENCE METRICS',
+            [
+              'Analysis Confidence: ${patternResult.confidenceMetrics.analysisConfidence}%',
+              'Prediction Confidence: ${patternResult.confidenceMetrics.predictionConfidence}%',
+              'Evidence Quality: ${patternResult.confidenceMetrics.evidenceQuality}',
+              'Viral Potential: ${patternResult.confidenceMetrics.viralPotential}/100',
+            ],
+            AppColors.primaryPurple,
+          ),
+          const SizedBox(height: 24),
+          
+          // Final Assessment
+          _buildFinalAssessment(patternResult),
+          const SizedBox(height: 24),
           
           // Premium Branding
           _buildPremiumBranding(),
@@ -760,10 +1017,80 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
-  Widget _buildPatternScoreSection() {
-    final score = _analysis!.patternResult!.patternAnalysis.patternSeverityScore;
-    final isHighRisk = score >= 60;
-    final isCritical = score >= 80;
+  // 🎯 INTELLIGENCE SECTION BUILDER
+  Widget _buildIntelligenceSection(String title, List<String> items, Color accentColor) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGray800.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        border: Border.all(
+          color: accentColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: accentColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.only(top: 6, right: 12),
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )).toList(),
+        ],
+      ),
+    );
+  }
+
+  // 🎯 FINAL ASSESSMENT
+  Widget _buildFinalAssessment(WhisperfirePatternResult patternResult) {
+    final severityScore = patternResult.patternAnalysis.patternSeverityScore;
+    final isHighRisk = severityScore >= 60;
+    final isCritical = severityScore >= 80;
     
     return Container(
       width: double.infinity,
@@ -785,33 +1112,37 @@ class _PatternTabState extends State<PatternTab> {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '🧩 PATTERN RISK SCORE',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
+          Row(
+            children: [
+              Icon(
+                isCritical ? Icons.warning : isHighRisk ? Icons.info : Icons.check_circle,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                isCritical ? '🚨 CRITICAL THREAT DETECTED' : isHighRisk ? '⚠️ HIGH RISK PATTERN' : '✅ MODERATE RISK',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
-            '$score/100',
-            style: TextStyle(
+            isCritical 
+                ? 'This pattern indicates severe psychological manipulation requiring immediate intervention.'
+                : isHighRisk
+                    ? 'This pattern shows concerning manipulation tactics that require attention.'
+                    : 'This pattern shows some concerning elements but may be manageable.',
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isCritical ? 'CRITICAL PATTERN' : isHighRisk ? 'HIGH RISK' : 'SAFE PATTERN',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
               fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.0,
+              height: 1.4,
             ),
           ),
         ],
@@ -819,107 +1150,33 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
-  Widget _buildPremiumPatternSection(String title, String content, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: color,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            height: 1.4,
-          ),
-        ),
-      ],
-    );
-  }
-
+  // 🎯 PREMIUM BRANDING
   Widget _buildPremiumBranding() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderGray600,
-            width: 0.5,
-          ),
-        ),
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.compare_arrows,
-            color: AppColors.primaryPink,
-            size: 16,
+            Icons.psychology,
+            color: Colors.white,
+            size: 20,
           ),
           const SizedBox(width: 8),
           Text(
-            'MySnitch AI',
+            'Powered by PATTERN.AI - Advanced Behavioral Intelligence',
             style: TextStyle(
-              color: AppColors.primaryPink,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
     );
-  }
-
-  // ✅ Helper method for pattern result sections
-  Widget _buildPatternSection(String title, String content, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: color,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _getModelDescription(String model) {
-    switch (model) {
-      case 'gpt-4-turbo':
-        return 'The latest and most powerful model from OpenAI, capable of handling complex tasks and providing detailed insights.';
-      case 'gpt-3.5-turbo':
-        return 'A more affordable option, offering good performance for many use cases.';
-      case 'gpt-4-vision':
-        return 'A model that can process and understand images, making it ideal for tasks requiring visual input.';
-      case 'gpt-4-code':
-        return 'A model specialized in code generation and understanding, perfect for developers.';
-      default:
-        return 'A powerful AI model for pattern analysis.';
-    }
   }
 } 

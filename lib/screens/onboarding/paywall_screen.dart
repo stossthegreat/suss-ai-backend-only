@@ -31,7 +31,7 @@ class _PaywallScreenState extends State<PaywallScreen>
       title: 'Monthly Plan',
       price: '\$7.99',
       originalPrice: null,
-      description: 'Perfect for trying UNAV',
+      description: 'Perfect for trying MySnitch AI',
       features: ['Unlimited scans', 'All analysis types', 'Priority support'],
       popular: false,
     ),
@@ -202,7 +202,7 @@ class _PaywallScreenState extends State<PaywallScreen>
         const SizedBox(height: AppConstants.mediumSpacing),
         
         const Text(
-          'Unlock UNAV Premium',
+          'Unlock MySnitch AI Premium',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,

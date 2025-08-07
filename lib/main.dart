@@ -18,9 +18,9 @@ class WhisperfireApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UNAV - Neural Pattern Scanner',
-      debugShowCheckedModeBanner: false,
+        return MaterialApp(
+      title: 'MySnitch AI - Neural Pattern Scanner',
+          debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: AppColors.primaryPink,

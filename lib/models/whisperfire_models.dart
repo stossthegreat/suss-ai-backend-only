@@ -162,20 +162,26 @@ class ViralVerdict {
 }
 
 class ConfidenceMetrics {
-  final String? ambiguityWarning;
-  final String evidenceStrength;
+  final int analysisConfidence;
+  final int predictionConfidence;
+  final String evidenceQuality;
+  final String? patternRationale;
   final int viralPotential;
 
   const ConfidenceMetrics({
-    this.ambiguityWarning,
-    required this.evidenceStrength,
+    required this.analysisConfidence,
+    required this.predictionConfidence,
+    required this.evidenceQuality,
+    this.patternRationale,
     required this.viralPotential,
   });
 
   factory ConfidenceMetrics.fromMap(Map<String, dynamic> map) {
     return ConfidenceMetrics(
-      ambiguityWarning: map['ambiguity_warning'],
-      evidenceStrength: map['evidence_strength'] ?? '',
+      analysisConfidence: int.tryParse(map['analysis_confidence'].toString()) ?? 0,
+      predictionConfidence: int.tryParse(map['prediction_confidence'].toString()) ?? 0,
+      evidenceQuality: map['evidence_quality'] ?? 'Moderate',
+      patternRationale: map['pattern_rationale'],
       viralPotential: int.tryParse(map['viral_potential'].toString()) ?? 0,
     );
   }

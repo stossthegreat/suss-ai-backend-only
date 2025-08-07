@@ -148,7 +148,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           
           const Expanded(
             child: Text(
-              'UNAV',
+              'MySnitch AI',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,

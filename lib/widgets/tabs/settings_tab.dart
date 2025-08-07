@@ -72,13 +72,26 @@ class _SettingsTabState extends State<SettingsTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(
-          'Settings',
+        Row(
+          children: [
+            Icon(
+              Icons.settings,
+              color: AppColors.primaryPurple,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            ShaderMask(
+              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              child: const Text(
+                'MySnitch AI Settings',
           style: TextStyle(
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -188,7 +188,7 @@ class _SignInScreenState extends State<SignInScreen>
         const SizedBox(height: AppConstants.mediumSpacing),
         
         const Text(
-          'Welcome to UNAV',
+          'Welcome to MySnitch AI',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,

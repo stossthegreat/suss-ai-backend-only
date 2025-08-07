@@ -29,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       icon: '🔍',
       title: 'INSTANT SCAN',
       subtitle: 'Decode any message in seconds',
-      description: 'UNAV reads between the lines, exposing hidden tactics and manipulation patterns that others miss.',
+      description: 'MySnitch AI reads between the lines, exposing hidden tactics and manipulation patterns that others miss.',
       gradient: AppColors.primaryGradient,
       backgroundColor: AppColors.backgroundGray900,
     ),

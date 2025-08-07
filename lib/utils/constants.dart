@@ -1,6 +1,32 @@
 import 'package:flutter/material.dart';
 import '../models/app_models.dart';
 
+// RELATIONSHIP CONTEXTS - Updated to match new backend prompts
+class RelationshipContext {
+  final String id;
+  final String label;
+  final String desc;
+
+  const RelationshipContext({
+    required this.id,
+    required this.label,
+    required this.desc,
+  });
+}
+
+// CONTENT TYPE
+class ContentType {
+  final String id;
+  final String label;
+  final String desc;
+
+  const ContentType({
+    required this.id,
+    required this.label,
+    required this.desc,
+  });
+}
+
 class AppConstants {
   // Animation Durations
   static const Duration fastAnimation = Duration(milliseconds: 200);
@@ -40,16 +66,58 @@ class AppConstants {
     Category(id: 'post', label: '📱 Post', desc: 'Social media posts'),
   ];
 
-  // 🚀 WHISPERFIRE RELATIONSHIP CONTEXTS
+  // RELATIONSHIP CONTEXTS - Updated to match new backend prompts
   static const List<RelationshipContext> relationshipContexts = [
-    RelationshipContext(id: 'Partner', label: '💕 Partner', desc: 'Romantic relationships'),
-    RelationshipContext(id: 'Ex', label: '💔 Ex', desc: 'Former partners'),
-    RelationshipContext(id: 'Date', label: '💘 Date', desc: 'Dating situations'),
-    RelationshipContext(id: 'Friend', label: '👥 Friend', desc: 'Friendships'),
-    RelationshipContext(id: 'Coworker', label: '💼 Coworker', desc: 'Work relationships'),
-    RelationshipContext(id: 'Family', label: '👨‍👩‍👧‍👦 Family', desc: 'Family dynamics'),
-    RelationshipContext(id: 'Roommate', label: '🏠 Roommate', desc: 'Living situations'),
-    RelationshipContext(id: 'Stranger', label: '👤 Stranger', desc: 'Unknown people'),
+    RelationshipContext(
+      id: 'Partner',
+      label: 'Partner',
+      desc: 'Romantic relationship',
+    ),
+    RelationshipContext(
+      id: 'Ex',
+      label: 'Ex',
+      desc: 'Former partner',
+    ),
+    RelationshipContext(
+      id: 'Date',
+      label: 'Date',
+      desc: 'Dating situation',
+    ),
+    RelationshipContext(
+      id: 'Friend',
+      label: 'Friend',
+      desc: 'Friendship',
+    ),
+    RelationshipContext(
+      id: 'Coworker',
+      label: 'Coworker',
+      desc: 'Work relationship',
+    ),
+    RelationshipContext(
+      id: 'Family',
+      label: 'Family',
+      desc: 'Family dynamic',
+    ),
+    RelationshipContext(
+      id: 'Roommate',
+      label: 'Roommate',
+      desc: 'Living situation',
+    ),
+    RelationshipContext(
+      id: 'Stranger',
+      label: 'Stranger',
+      desc: 'Unknown person',
+    ),
+    RelationshipContext(
+      id: 'Boss',
+      label: 'Boss / Authority',
+      desc: 'Authority figure',
+    ),
+    RelationshipContext(
+      id: 'Acquaintance',
+      label: 'Acquaintance',
+      desc: 'Casual contact',
+    ),
   ];
 
   // 🚀 WHISPERFIRE ANALYSIS GOALS
@@ -59,11 +127,21 @@ class AppConstants {
     AnalysisGoal(id: 'pattern_profiling', label: '🧠 Pattern Profiling', desc: 'Deep behavioral analysis'),
   ];
 
-  // 🚀 WHISPERFIRE TONE STYLES
-  static const List<ToneStyle> toneStyles = [
-    ToneStyle(id: 'brutal', label: '🔥 Brutal', desc: 'No mercy'),
-    ToneStyle(id: 'soft', label: '💭 Soft', desc: 'Gentle truth'),
-    ToneStyle(id: 'clinical', label: '🧠 Clinical', desc: 'Cold facts'),
+  // OUTPUT MODES - Updated to match new backend prompts
+  static const List<String> outputModes = [
+    'Intel',      // Tactical, factual, high-clarity threat analysis
+    'Narrative',  // Story-driven pattern breakdown
+    'Roast',      // Savage but truthful, meme-worthy
+    'Therapeutic', // Healing-focused, validating, softer (Scan tab only)
+  ];
+
+  // TONE OPTIONS - Updated to match backend expectations
+  static const List<String> toneOptions = [
+    'brutal',        // Maximum exposure, no sugar-coating
+    'soft',          // Gentle, validating
+    'clinical',      // Forensic, emotionally neutral
+    'mature',        // Balanced, credible, culturally sharp
+    'savage',        // Savage but truthful
   ];
 
   // 🚀 WHISPERFIRE COMEBACK TONES
@@ -98,5 +176,15 @@ class AppConstants {
     'claude-3-opus',
     'claude-3-sonnet',
     'deepseek-v3',
+  ];
+
+  // CONTENT TYPES
+  static const List<ContentType> contentTypes = [
+    ContentType(id: 'dm', label: 'DM', desc: 'Direct message'),
+    ContentType(id: 'bio', label: 'Bio', desc: 'Profile bio'),
+    ContentType(id: 'story', label: 'Story', desc: 'Social story'),
+    ContentType(id: 'post', label: 'Post', desc: 'Social post'),
+    ContentType(id: 'email', label: 'Email', desc: 'Email message'),
+    ContentType(id: 'text', label: 'Text', desc: 'Text message'),
   ];
 } 

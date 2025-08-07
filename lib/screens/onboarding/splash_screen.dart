@@ -178,7 +178,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Opacity(
                       opacity: _textFadeAnimation.value,
                       child: const Text(
-                        'UNAV',
+                        'MySnitch AI',
                         style: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
-import '../../utils/mock_data.dart';
 import '../../models/whisperfire_models.dart';
 import '../../services/api_service.dart';
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
 import '../common/outlined_button.dart';
 import '../common/result_card.dart';
-import '../common/score_display.dart';
-import '../common/expandable_section.dart';
-import '../common/watermark_stamp.dart';
 
 class ScanTab extends StatefulWidget {
   const ScanTab({super.key});
@@ -21,13 +17,13 @@ class ScanTab extends StatefulWidget {
 
 class _ScanTabState extends State<ScanTab> {
   final TextEditingController _textController = TextEditingController();
-  final TextEditingController _relationshipController = TextEditingController();
-  String _selectedCategory = 'dm'; // Updated default to DM
-  String _selectedTone = 'brutal';
-  String _selectedRelationship = 'Partner'; // New relationship context
-  String _selectedAnalysisGoal = 'instant_scan'; // New analysis goal
-  bool _isAnalyzing = false;
+  String _selectedAnalysisGoal = 'instant_scan';
+  String _selectedRelationship = 'Partner';
+  String _selectedOutputMode = 'Intel';
+  String _selectedTone = 'Serious';
+  String _selectedCategory = 'dm';
   WhisperfireResponse? _analysis;
+  bool _isAnalyzing = false;
   bool _showLieDetector = false;
 
   @override
@@ -37,46 +33,31 @@ class _ScanTabState extends State<ScanTab> {
     _textController.addListener(() {
       setState(() {}); // Rebuild to update button state
     });
-    _relationshipController.addListener(() {
-      setState(() {}); // Rebuild to update button state
-    });
   }
 
   @override
   void dispose() {
     _textController.dispose();
-    _relationshipController.dispose();
     super.dispose();
   }
 
-  Future<void> _runAnalysis() async {
+  Future<void> _runScan() async {
     if (_textController.text.trim().isEmpty) return;
-    
-    // Check if relationship is selected
-    if (_selectedRelationship.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a relationship type'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
     
     setState(() {
       _isAnalyzing = true;
       _analysis = null;
-      _showLieDetector = false;
     });
 
     try {
-      // Call the WHISPERFIRE API service
+      // Use pattern analysis for all scan types since backend only supports pattern_profiling
       final result = await ApiService.analyzeMessageWhisperfire(
         inputText: _textController.text.trim(),
         contentType: _selectedCategory,
-        analysisGoal: _selectedAnalysisGoal,
-        tone: _selectedTone,
+        analysisGoal: 'pattern_profiling', // Always use pattern_profiling
         relationship: _selectedRelationship,
+        outputStyle: _selectedOutputMode.toLowerCase(),
+        tone: _selectedTone.toLowerCase(),
       );
 
       if (mounted) {
@@ -86,15 +67,14 @@ class _ScanTabState extends State<ScanTab> {
         });
       }
     } catch (error) {
-      print('❌ Scan analysis failed: $error');
+      print('Scan failed: $error');
       if (mounted) {
         setState(() {
           _isAnalyzing = false;
         });
-        // Show error message to user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Analysis failed: ${error.toString()}'),
+            content: Text('Scan failed: ${error.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -112,8 +92,20 @@ class _ScanTabState extends State<ScanTab> {
           _buildHeader(),
           const SizedBox(height: 24),
           
-          // Relationship Field
-          _buildRelationshipField(),
+          // Relationship Selector
+          _buildRelationshipSelector(),
+          const SizedBox(height: 24),
+          
+          // Output Mode Selector
+          _buildOutputModeSelector(),
+          const SizedBox(height: 24),
+          
+          // Tone Selector
+          _buildToneSelector(),
+          const SizedBox(height: 24),
+          
+          // Content Type Selector
+          _buildContentTypeSelector(),
           const SizedBox(height: 24),
           
           // Input Section
@@ -127,10 +119,6 @@ class _ScanTabState extends State<ScanTab> {
           // Analysis Goal Selector
           _buildAnalysisGoalSelector(),
           const SizedBox(height: 20),
-          
-          // Tone Style Selector
-          _buildToneSelector(),
-          const SizedBox(height: 24),
           
           // Scan Button
           _buildScanButton(),
@@ -183,7 +171,8 @@ class _ScanTabState extends State<ScanTab> {
     );
   }
 
-  Widget _buildRelationshipField() {
+  // RELATIONSHIP SELECTOR - Updated to match new backend prompts
+  Widget _buildRelationshipSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -198,11 +187,10 @@ class _ScanTabState extends State<ScanTab> {
         ),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
             color: AppColors.backgroundGray800,
-            borderRadius: BorderRadius.circular(AppConstants.mediumRadius),
-            border: Border.all(color: AppColors.borderGray600),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -242,6 +230,169 @@ class _ScanTabState extends State<ScanTab> {
               },
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  // OUTPUT MODE SELECTOR
+  Widget _buildOutputModeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'OUTPUT STYLE',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
+            color: AppColors.backgroundGray800,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedOutputMode,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              items: AppConstants.outputModes.map((mode) {
+                return DropdownMenuItem<String>(
+                  value: mode,
+                  child: Text(mode),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                    setState(() {
+                    _selectedOutputMode = value;
+                    });
+                }
+                  },
+                ),
+              ),
+        ),
+      ],
+    );
+  }
+
+  // TONE SELECTOR - Updated to match new backend prompts
+  Widget _buildToneSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'TONE STYLE',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.borderGray700),
+            color: AppColors.backgroundGray800,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedTone,
+              isExpanded: true,
+              dropdownColor: AppColors.backgroundGray800,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              items: AppConstants.toneOptions.map((tone) {
+                return DropdownMenuItem<String>(
+                  value: tone,
+                  child: Text(tone),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedTone = value;
+                  });
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // CONTENT TYPE SELECTOR
+  Widget _buildContentTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'CONTENT TYPE',
+          style: TextStyle(
+            color: AppColors.textGray400,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: AppConstants.contentTypes.map((category) {
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: CustomOutlinedButton(
+                  text: '',
+                  isSelected: _selectedCategory == category.id,
+                  selectedColor: AppColors.primaryPurple,
+                  onPressed: () {
+                    setState(() {
+                      _selectedCategory = category.id;
+                    });
+                  },
+                  child: Column(
+                    children: [
+                      Text(
+                        category.label,
+                        style: TextStyle(
+                          color: _selectedCategory == category.id
+                              ? AppColors.primaryPurple
+                              : AppColors.textGray400,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        category.desc,
+                        style: TextStyle(
+                          color: (_selectedCategory == category.id
+                                  ? AppColors.primaryPurple
+                                  : AppColors.textGray400)
+                              .withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
@@ -357,68 +508,6 @@ class _ScanTabState extends State<ScanTab> {
     );
   }
 
-  Widget _buildToneSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'ANALYSIS STYLE',
-          style: TextStyle(
-            color: AppColors.textGray400,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: AppConstants.toneStyles.map((tone) {
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: CustomOutlinedButton(
-                  text: '',
-                  isSelected: _selectedTone == tone.id,
-                  selectedColor: AppColors.primaryPurple,
-                  onPressed: () {
-                    setState(() {
-                      _selectedTone = tone.id;
-                    });
-                  },
-                  child: Column(
-                    children: [
-                      Text(
-                        tone.label,
-                        style: TextStyle(
-                          color: _selectedTone == tone.id
-                              ? AppColors.primaryPurple
-                              : AppColors.textGray400,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        tone.desc,
-                        style: TextStyle(
-                          color: (_selectedTone == tone.id
-                                  ? AppColors.primaryPurple
-                                  : AppColors.textGray400)
-                              .withOpacity(0.7),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
   Widget _buildScanButton() {
     // Check if both text and relationship are filled
     final hasText = _textController.text.trim().isNotEmpty;
@@ -432,15 +521,15 @@ class _ScanTabState extends State<ScanTab> {
       icon: _isAnalyzing ? null : const Icon(Icons.flash_on, color: Colors.white),
       width: double.infinity,
       height: 56,
-      onPressed: _runAnalysis,
+      onPressed: _runScan,
     );
   }
 
   Widget _buildResults() {
-    // Handle different analysis goals
-    if (_selectedAnalysisGoal == 'instant_scan' && _analysis!.scanResult != null) {
+    // Handle different analysis goals - all use pattern analysis but display differently
+    if (_selectedAnalysisGoal == 'instant_scan' && _analysis!.patternResult != null) {
       return _buildInstantScanResults();
-    } else if (_selectedAnalysisGoal == 'comeback_generation' && _analysis!.comebackResult != null) {
+    } else if (_selectedAnalysisGoal == 'comeback_generation' && _analysis!.patternResult != null) {
       return _buildComebackResults();
     } else if (_selectedAnalysisGoal == 'pattern_profiling' && _analysis!.patternResult != null) {
       return _buildPatternResults();
@@ -489,6 +578,8 @@ class _ScanTabState extends State<ScanTab> {
   }
 
   Widget _buildInstantScanResults() {
+    final patternResult = _analysis!.patternResult!;
+    
     return ResultCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,7 +600,7 @@ class _ScanTabState extends State<ScanTab> {
               children: [
                 Expanded(
                   child: Text(
-                    _analysis!.scanResult!.instantRead.headline,
+                    patternResult.behavioralProfile.headline,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -522,7 +613,6 @@ class _ScanTabState extends State<ScanTab> {
                 // Share Button
                 GestureDetector(
                   onTap: () {
-                    // TODO: Implement share functionality
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Share feature coming soon!'),
@@ -573,7 +663,7 @@ class _ScanTabState extends State<ScanTab> {
           // Primary Motive
           _buildPremiumSection(
             '🎯 PRIMARY MOTIVE',
-            _analysis!.scanResult!.instantRead.salientFactor,
+            patternResult.psychologicalAssessment.primaryAgenda,
             AppColors.primaryPink,
           ),
           const SizedBox(height: 16),
@@ -581,7 +671,7 @@ class _ScanTabState extends State<ScanTab> {
           // How it will make you feel
           _buildPremiumSection(
             '😬 EMOTIONAL IMPACT',
-            _analysis!.scanResult!.instantRead.emotionalTarget,
+            patternResult.psychologicalAssessment.emotionalDamageInflicted,
             AppColors.warningOrange,
           ),
           const SizedBox(height: 16),
@@ -589,7 +679,7 @@ class _ScanTabState extends State<ScanTab> {
           // What they're not saying
           _buildPremiumSection(
             '🧠 HIDDEN SUBTEXT',
-            _analysis!.scanResult!.instantInsights.whatTheyreNotSaying,
+            patternResult.viralInsights.lifeSavingInsight,
             AppColors.primaryPurple,
           ),
           const SizedBox(height: 16),
@@ -597,9 +687,27 @@ class _ScanTabState extends State<ScanTab> {
           // Pattern Recognition
           _buildPremiumSection(
             '🕵️ PATTERN RECOGNITION',
-            _analysis!.scanResult!.instantInsights.patternPrediction,
+            patternResult.patternAnalysis.manipulationCycle,
             AppColors.primaryCyan,
           ),
+          const SizedBox(height: 16),
+          
+          // Why This Feels Wrong
+          if (patternResult.psychologicalAssessment.empathyDeficitIndicators.isNotEmpty)
+            _buildPremiumSection(
+              '⚠️ WHY THIS FEELS WRONG',
+              patternResult.psychologicalAssessment.empathyDeficitIndicators.join(', '),
+              AppColors.dangerRed,
+            ),
+          const SizedBox(height: 16),
+          
+          // Next Tactic Likely
+          if (patternResult.riskAssessment.futureBehaviorPrediction.isNotEmpty)
+            _buildPremiumSection(
+              '🔮 NEXT TACTIC LIKELY',
+              patternResult.riskAssessment.futureBehaviorPrediction,
+              AppColors.warningOrange,
+            ),
           const SizedBox(height: 16),
           
           // Comeback - Prominent Display
@@ -1084,7 +1192,7 @@ class _ScanTabState extends State<ScanTab> {
   }
 
   Widget _buildPremiumScoreSection() {
-    final score = _analysis!.scanResult!.psychologicalScan.redFlagIntensity;
+    final score = _analysis!.patternResult!.patternAnalysis.patternSeverityScore;
     final isHighRisk = score >= 60;
     final isCritical = score >= 80;
     
@@ -1195,7 +1303,7 @@ class _ScanTabState extends State<ScanTab> {
           ),
           const SizedBox(height: 12),
           Text(
-            _analysis!.scanResult!.rapidResponse.comebackSuggestion,
+            _analysis!.patternResult!.strategicRecommendations.boundaryEnforcementStrategy,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -1248,7 +1356,7 @@ class _ScanTabState extends State<ScanTab> {
           ),
           const SizedBox(height: 12),
           Text(
-            _analysis!.scanResult!.viralVerdict.sussVerdict,
+            _analysis!.patternResult!.viralInsights.sussVerdict,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
@@ -1258,7 +1366,7 @@ class _ScanTabState extends State<ScanTab> {
           ),
           const SizedBox(height: 8),
           Text(
-            _analysis!.scanResult!.viralVerdict.gutValidation,
+            _analysis!.patternResult!.viralInsights.gutValidation,
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
               fontSize: 13,

@@ -1,3 +1,4 @@
+// 🚀 ANALYSIS SERVICE - LEGACY SYSTEM
 import 'dart:convert';
 import 'dart:html' as html;
 import '../models/analysis_result.dart';
@@ -5,8 +6,8 @@ import '../models/pattern_analysis.dart';
 import '../models/history_item.dart';
 
 class AnalysisService {
-  // 🚀 RAILWAY BACKEND URL
-  static const String baseUrl = 'https://suss-ai-backend-only-production-c323.up.railway.app/api/v1';
+  // ✅ Point to the correct backend URL
+  static const String baseUrl = 'https://suss-ai-backend-only-production.up.railway.app/api/v1';
   // static const String baseUrl = 'http://127.0.0.1:3000/api/v1'; // For local development
 
   // 🎯 ANALYZE MESSAGE - SIMPLIFIED VERSION

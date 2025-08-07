@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../utils/colors.dart';
 import '../../utils/constants.dart';
-import '../../utils/glassmorphism.dart';
-import '../../utils/mock_data.dart';
 import '../../services/api_service.dart';
-import '../../models/analysis_result.dart';
-
 import '../common/custom_text_field.dart';
 import '../common/gradient_button.dart';
 import '../common/outlined_button.dart';
@@ -33,27 +29,28 @@ class _ComebacksTabState extends State<ComebacksTab> {
     });
 
     try {
-      // Use the WHISPERFIRE comeback generation
+      // Use pattern analysis for comeback generation since backend only supports pattern_profiling
       final result = await ApiService.analyzeMessageWhisperfire(
         inputText: _textController.text.trim(),
         contentType: 'dm',
-        analysisGoal: 'comeback_generation',
-        tone: _selectedTone,
+        analysisGoal: 'pattern_profiling', // Always use pattern_profiling
+        tone: _mapComebackToneToBackendTone(_selectedTone),
         relationship: _selectedRelationship,
         stylePreference: _selectedStyle,
       );
 
       if (mounted) {
         setState(() {
-          if (result.comebackResult != null) {
-            _generatedComeback = result.comebackResult!.primaryComeback;
+          if (result.patternResult != null) {
+            // Use strategic recommendations as comeback
+            _generatedComeback = result.patternResult!.strategicRecommendations.boundaryEnforcementStrategy;
           } else {
             _generatedComeback = 'No comeback generated';
           }
         });
       }
     } catch (error) {
-      print('❌ Comeback generation failed: $error');
+      print('Comeback generation failed: $error');
       if (mounted) {
         setState(() {
           _generatedComeback = 'Failed to generate comeback. Please try again.';
@@ -135,13 +132,27 @@ class _ComebacksTabState extends State<ComebacksTab> {
     return Column(
       children: [
         const SizedBox(height: 16),
-        const Text(
-          '🗡️ Comebacks',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.flash_on,
+              color: AppColors.primaryPink,
+              size: 32,
+            ),
+            const SizedBox(width: 8),
+            ShaderMask(
+              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              child: const Text(
+                'MySnitch AI',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(

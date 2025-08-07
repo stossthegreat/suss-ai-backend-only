@@ -123,7 +123,7 @@ class _DemoScanScreenState extends State<DemoScanScreen>
         ),
         const Expanded(
           child: Text(
-            'UNAV Instant Scan',
+            'MySnitch AI Instant Scan',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
