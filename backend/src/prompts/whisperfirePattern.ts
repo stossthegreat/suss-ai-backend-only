@@ -240,12 +240,6 @@ DATING FOCUS:
   // 🎨 TONE INSTRUCTION SYSTEM
   private static getToneInstructions(tone: string): string {
     const tones = {
-      'brutal': `
-TONE: BRUTAL
-- Use sharp, clinical truth — no sugarcoating
-- Prioritize clarity over comfort
-- Call out escalation risk in plain terms`,
-
       'clinical': `
 TONE: CLINICAL
 - Objective psychological language
@@ -256,7 +250,19 @@ TONE: CLINICAL
 TONE: SOFT
 - Gentle but clear
 - Validate pain without overwhelming
-- Focus on safety, hope, and empowerment`
+- Focus on safety, hope, and empowerment`,
+
+      'mature': `
+TONE: MATURE
+- Balanced and credible
+- Culturally sharp and nuanced
+- Focus on wisdom and perspective`,
+
+      'savage': `
+TONE: SAVAGE
+- Direct and unapologetic
+- Truthful but cutting
+- Focus on reality checks and wake-up calls`
     };
 
     return tones[tone as keyof typeof tones] || tones.clinical;
