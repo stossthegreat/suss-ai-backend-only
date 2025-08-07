@@ -81,7 +81,7 @@ class _SignInScreenState extends State<SignInScreen>
     
     if (mounted) {
       setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/paywall');
+      Navigator.pushReplacementNamed(context, '/main');
     }
   }
 
@@ -90,7 +90,7 @@ class _SignInScreenState extends State<SignInScreen>
     await Future.delayed(const Duration(seconds: 1));
     if (mounted) {
       setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/paywall');
+      Navigator.pushReplacementNamed(context, '/main');
     }
   }
 
@@ -99,7 +99,7 @@ class _SignInScreenState extends State<SignInScreen>
     await Future.delayed(const Duration(seconds: 1));
     if (mounted) {
       setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/paywall');
+      Navigator.pushReplacementNamed(context, '/main');
     }
   }
 
@@ -216,7 +216,7 @@ class _SignInScreenState extends State<SignInScreen>
           text: 'Continue with Google',
           onPressed: () {
             // TODO: Implement Google sign-in
-            Navigator.pushNamed(context, '/paywall');
+            Navigator.pushNamed(context, '/main');
           },
         ),
         
@@ -226,7 +226,7 @@ class _SignInScreenState extends State<SignInScreen>
           text: 'Continue with Apple',
           onPressed: () {
             // TODO: Implement Apple sign-in
-            Navigator.pushNamed(context, '/paywall');
+            Navigator.pushNamed(context, '/main');
           },
         ),
       ],
