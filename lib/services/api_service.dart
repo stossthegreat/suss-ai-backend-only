@@ -457,8 +457,10 @@ class ApiService {
         'gut_validation': 'You\'re not crazy, you\'re being calculated against. Their desperation = your confirmation you\'re winning'
       },
       'confidence_metrics': {
-        'ambiguity_warning': null,
-        'evidence_strength': 'Multiple manipulation patterns detected across all messages with high consistency',
+        'analysis_confidence': 94,
+        'prediction_confidence': 89,
+        'evidence_quality': 'Strong',
+        'pattern_rationale': 'Multiple manipulation patterns detected across all messages with high consistency',
         'viral_potential': 94
       }
     });
@@ -517,8 +519,10 @@ class ApiService {
         gutValidation: 'N/A',
       ),
       confidenceMetrics: confidenceMetrics != null ? ConfidenceMetrics.fromMap(confidenceMetrics) : ConfidenceMetrics(
-        ambiguityWarning: null,
-        evidenceStrength: 'N/A',
+        analysisConfidence: 0,
+        predictionConfidence: 0,
+        evidenceQuality: 'N/A',
+        patternRationale: null,
         viralPotential: 0,
       ),
     );
@@ -569,8 +573,10 @@ class ApiService {
         'gut_validation': 'N/A'
       },
       'confidence_metrics': {
-        'ambiguity_warning': null,
-        'evidence_strength': 'N/A',
+        'analysis_confidence': 0,
+        'prediction_confidence': 0,
+        'evidence_quality': 'N/A',
+        'pattern_rationale': null,
         'viral_potential': 0
       }
     });
