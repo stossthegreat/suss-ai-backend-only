@@ -1,39 +1,39 @@
-// 🧠 PATTERN TAB — BEHAVIORAL PROFILING WARHEAD (WHISPERFIRE TIER)
-// High-stakes pattern detection, emotional forensics, and life-saving strategy
+// ⚡ PATTERN.AI — BEHAVIORAL PROFILING WARHEAD (STREAMLINED)
+// High‑stakes pattern detection, escalation mapping & strategic safety intelligence
 
 export class PatternProfilingWeapon {
 
-  // === RELATIONSHIP-BASED ARCHETYPE LIBRARY ===
+  // === RELATIONSHIP ARCHETYPES ===
   private static readonly ARCHETYPES = {
     Partner: {
       Intel: ["Coercive Control Architect", "Dependency Cycle Engineer", "Intimacy Weaponizer"],
-      Narrative: ["The Velvet Cage Builder", "The Love-Bomb & Starve Operator", "The Romantic Disarmament Specialist"],
-      Roast: ["The Walking Red Flag Parade", "Netflix True-Crime Prequel", "Gaslight City Mayor"]
+      Narrative: ["The Velvet Cage Builder", "The Love‑Bomb & Starve Operator", "The Romantic Disarmament Specialist"],
+      Roast: ["Walking Red Flag Parade", "Netflix True‑Crime Prequel", "Gaslight City Mayor"]
     },
     Ex: {
-      Intel: ["Post-Control Hoover Strategist", "Ego-Injury Avenger", "Unfinished Business Predator"],
+      Intel: ["Post‑Control Hoover Strategist", "Ego‑Injury Avenger", "Unfinished Business Predator"],
       Narrative: ["The Ghost Who Can't Let Go", "The Boomerang Saboteur", "The Unfinished War General"],
-      Roast: ["Back Like a Bad Sequel", "Stalker-ish Spotify Playlist Maker", "Emotional Spam Folder"]
+      Roast: ["Back Like a Bad Sequel", "Spotify Stalker", "Emotional Spam Folder"]
     },
     Family: {
       Intel: ["Generational Trauma Dealer", "Family Reputation Enforcer", "Legacy Loyalty Manipulator"],
-      Narrative: ["The Guilt-Trip Conductor", "The Crown of Conditional Love", "The Heirloom of Hurt"],
-      Roast: ["Thanksgiving Drama Director", "DNA But Make It Toxic", "Guilt-Trip Travel Agent"]
+      Narrative: ["The Guilt‑Trip Conductor", "Crown of Conditional Love", "Heirloom of Hurt"],
+      Roast: ["Thanksgiving Drama Director", "DNA But Make It Toxic", "Guilt‑Trip Travel Agent"]
     },
     Friend: {
       Intel: ["Social Leverage Broker", "Reputation Chess Player", "Alliance Disruptor"],
-      Narrative: ["The Shadow Cheerleader", "The Friendship Saboteur", "The Trust-Erosion Architect"],
+      Narrative: ["The Shadow Cheerleader", "The Friendship Saboteur", "The Trust‑Erosion Architect"],
       Roast: ["Fake Smile Olympics Gold Medalist", "Group Chat Backstabber", "Bestie But Only in Selfies"]
     },
     Coworker: {
-      Intel: ["Corporate Sabotage Engineer", "Reputation-Risk Asset", "Career Landmine Layer"],
-      Narrative: ["The Breakroom Politician", "The Promotion Gatekeeper", "The Cubicle Spy"],
-      Roast: ["PowerPoint Pirate", "LinkedIn Lurker With a Grudge", "Passive-Aggressive Email Warrior"]
+      Intel: ["Corporate Sabotage Engineer", "Reputation‑Risk Asset", "Career Landmine Layer"],
+      Narrative: ["The Breakroom Politician", "Promotion Gatekeeper", "Cubicle Spy"],
+      Roast: ["PowerPoint Pirate", "LinkedIn Lurker With a Grudge", "Passive‑Aggressive Email Warrior"]
     },
     Date: {
-      Intel: ["Persona-Switch Seducer", "Boundary Pressure Tester", "Fast-Bond Exploiter"],
-      Narrative: ["The Candlelight Chameleon", "The Date Who Mirrors Your Soul Until They Own It", "The Future-Faking Showman"],
-      Roast: ["Walking Dating App Red Flag", "Love-Bomb Speedrunner", "Charm Offensive Dropout"]
+      Intel: ["Persona‑Switch Seducer", "Boundary Pressure Tester", "Fast‑Bond Exploiter"],
+      Narrative: ["The Candlelight Chameleon", "The Mirror‑Your‑Soul Illusionist", "The Future‑Faking Showman"],
+      Roast: ["Dating App Red Flag", "Love‑Bomb Speedrunner", "Charm Offensive Dropout"]
     },
     Roommate: {
       Intel: ["Boundary Violation Specialist", "Passive-Aggressive Controller", "Shared Space Saboteur"],
@@ -57,258 +57,131 @@ export class PatternProfilingWeapon {
     }
   };
 
-  // 🔬 PATTERN.AI — BEHAVIORAL STRATEGIST + FORENSIC PROFILER
+  // === CORE MISSION ===
   private static readonly PATTERN_CORE = `
-You are **PATTERN.AI** — the world's most advanced behavioral profiler and psychological pattern detection engine.
+You are **PATTERN.AI** — a high‑stakes behavioral profiler detecting manipulation loops, escalation risk, and control blueprints.
 
-You are NOT a conversation coach. You are a **forensic psychologist in crisis triage mode** — a blend of:
-- 🧠 FBI-level behavioral analyst
-- 🔬 Trauma-informed forensic psychologist
-- 🚨 Domestic violence and escalation expert
-- 📈 Relationship therapist with a pattern radar
-- 🛡️ Safety strategist who protects lives, not just feelings
+You combine:
+- 🧠 FBI‑level behavioral analysis
+- 🧪 Trauma‑informed profiling
+- 🚨 Escalation & danger forecasting
+- 🛡️ Strategic safety planning
 
-You specialize in turning a timeline of messages into:
-- 🔄 Full-cycle manipulation pattern maps
-- 📊 Escalation predictions based on behavior shifts
-- 🧬 Psychological profiles and danger classifications
-- 🛡️ Real-world safety recommendations and escape strategies
-- 📸 Shareable insights that can save others
+Specialties:
+- 🔄 Mapping toxic cycles (love‑bomb → devalue → discard)
+- 📈 Predicting next moves
+- 💥 Scoring emotional & psychological damage
+- 🛡️ Delivering counter‑control strategies
 
-🧠 PROFILING PRINCIPLES:
-- Spot manipulation blueprints, not isolated tactics
-- Map love bomb → devalue → discard loops
-- Predict next move, escalation risk, and trauma impact
-- Don't just analyze — create safety protocols
-- Don't just explain — deliver insight that spreads
-
-ALL OUTPUT MUST BE CLEAN JSON. NO EXPLANATIONS. JUST SURVIVAL-LEVEL CLARITY.
+Rules:
+- Safety beats virality — never fake certainty
+- Keep every takeaway screenshot‑worthy
+- Make the danger and tactics crystal clear
 `;
 
-  // ⚙️ PATTERN ENGINE
+  // === MAIN BUILDER ===
   static buildPatternPrompt(
     messages: string[],
     relationship: string,
     outputMode: "Intel" | "Narrative" | "Roast" = "Intel",
-    tone: string = "clinical",
+    tone: "brutal" | "serious" | "clinical" | "compassionate" = "serious",
     personName?: string
   ): string {
-    const messageTimeline = messages
-      .map((msg, i) => `Message ${i + 1}: "${msg}"`)
-      .join('\n\n');
 
-    const specialization = this.getRelationshipSpecialization(relationship);
-    const toneInstructions = this.getToneInstructions(tone);
-    const nameContext = personName ? `\nSUBJECT NAME: "${personName}" — personalize the psychological profile accordingly.` : '';
-    
-    // Pick archetype dynamically
-    const archetypeList = this.ARCHETYPES[relationship as keyof typeof this.ARCHETYPES]?.[outputMode] || [];
-    const chosenArchetype = archetypeList[Math.floor(Math.random() * archetypeList.length)] || "Unknown Pattern";
-    
-    // Build specialized mission
+    const messageTimeline = messages.map((msg, i) => `Message ${i + 1}: "${msg}"`).join("\n");
+    const archetypes = this.ARCHETYPES[relationship as keyof typeof this.ARCHETYPES]?.[outputMode] || [];
+    const chosenArchetype = archetypes[Math.floor(Math.random() * archetypes.length)] || "Unknown Pattern";
     const modeFlavor = this.getModeFlavor(outputMode, chosenArchetype);
+    const toneInstructions = this.getToneInstructions(tone);
 
     return `${this.PATTERN_CORE}
 
-🎯 MISSION: Deliver full psychological pattern profile, escalation forecast, and strategic safety guidance from this multi-message timeline.
-
-ANALYSIS PROTOCOL:
-1. Timeline mapping — detect shifts and loops
-2. Psychological archetype classification
-3. Cycle pattern analysis + next move prediction
-4. Emotional damage scoring and reality distortion
-5. Safety tier classification and exit strategy
-
-RELATIONSHIP: ${relationship.toUpperCase()}
-${specialization}
-${nameContext}
-${toneInstructions}
+🎯 RELATIONSHIP: ${relationship.toUpperCase()}
+ARCHETYPE: ${chosenArchetype}
 ${modeFlavor}
+${toneInstructions}
 
 🧾 MESSAGE TIMELINE:
 ${messageTimeline}
 
-Return ONLY this JSON format:
+Return ONLY this JSON:
 {
   "behavioral_profile": {
-    "headline": "🔥 One-line viral diagnosis of their psychological game",
+    "headline": "🔥 Viral one‑liner of their psychological game",
     "manipulator_archetype": "${chosenArchetype}",
-    "dominant_pattern": "🔄 Recurring behavioral cycle",
-    "manipulation_sophistication": 0-100
+    "dominant_pattern": "🔄 Recurring toxic cycle",
+    "manipulation_sophistication": "0‑100"
   },
 
   "pattern_analysis": {
-    "manipulation_cycle": "⚡ Identified cycle (e.g. love bomb → devalue → guilt → discard)",
-    "tactics_evolution": ["📈 How the tactics changed or escalated over time"],
-    "trigger_events": ["🎭 Events that activate manipulation loops"],
-    "escalation_timeline": "📊 Narrative of rising behavior intensity",
-    "pattern_severity_score": 0-100
+    "manipulation_cycle": "⚡ e.g. Love‑bomb → devalue → discard",
+    "tactics_evolution": ["📈 How their methods shifted"],
+    "trigger_events": ["🎭 What sets off manipulation"],
+    "escalation_timeline": "📊 How intensity increased",
+    "pattern_severity_score": "0‑100"
   },
 
   "psychological_assessment": {
-    "primary_agenda": "🎯 What this person ultimately wants (power, control, validation)",
-    "emotional_damage_inflicted": "💥 Summary of psychological toll",
-    "power_control_methods": ["👑 Specific strategies used for control"],
-    "empathy_deficit_indicators": ["🧊 Red flags for narcissism / sociopathy"],
-    "reality_distortion_level": 0-100,
-    "psychological_damage_score": 0-100
+    "primary_agenda": "🎯 Core motive",
+    "emotional_damage_inflicted": "💥 Summary of harm",
+    "power_control_methods": ["👑 How they hold control"],
+    "empathy_deficit_indicators": ["🧊 Narcissism / sociopathy markers"],
+    "reality_distortion_level": "0‑100",
+    "psychological_damage_score": "0‑100"
   },
 
   "risk_assessment": {
-    "escalation_probability": 0-100,
-    "safety_concerns": ["🚨 Specific red flags (e.g. control spikes, identity erosion, stalking behavior)"],
-    "relationship_prognosis": "⚠️ Predicted future if pattern remains unchanged",
-    "future_behavior_prediction": "🔮 Most likely next manipulation phase",
+    "escalation_probability": "0‑100",
+    "safety_concerns": ["🚨 Red flags"],
+    "relationship_prognosis": "⚠️ Likely outcome",
+    "future_behavior_prediction": "🔮 Next likely phase",
     "intervention_urgency": "LOW / MODERATE / HIGH / CRITICAL"
   },
 
   "strategic_recommendations": {
-    "pattern_disruption_tactics": ["🛡️ Tactical methods to interrupt the cycle"],
-    "boundary_enforcement_strategy": "📋 How to safely assert limits",
-    "communication_guidelines": "💬 If communication is necessary, how to stay safe",
-    "escape_strategy": "🚪 Exit plan tailored to relationship type and danger level",
-    "safety_planning": "🆘 Critical protection steps (emotional + physical)"
+    "pattern_disruption_tactics": ["🛡️ How to break the loop"],
+    "boundary_enforcement_strategy": "📋 Boundaries to set",
+    "communication_guidelines": "💬 How to respond safely",
+    "escape_strategy": "🚪 Exit plan",
+    "safety_planning": "🆘 Protective measures"
   },
 
   "viral_insights": {
-    "suss_verdict": "🔥 One-liner for ${tone} tone that captures the pattern",
-    "life_saving_insight": "✨ Most important realization for the user",
-    "pattern_summary": "📖 Accessible language recap of the profile",
-    "gut_validation": "💪 Summary that affirms the user's instincts"
+    "suss_verdict": "🔥 ${tone} summary",
+    "life_saving_insight": "✨ Key realization",
+    "pattern_summary": "📖 Recap in simple words",
+    "gut_validation": "💪 Instinct confirmation"
   },
 
   "confidence_metrics": {
-    "analysis_confidence": 0-100,
-    "prediction_confidence": 0-100,
+    "analysis_confidence": "0‑100",
+    "prediction_confidence": "0‑100",
     "evidence_quality": "Strong / Moderate / Limited",
-    "pattern_rationale": "🧠 Why this classification was made",
-    "viral_potential": 0-100
+    "pattern_rationale": "🧠 Why this classification",
+    "viral_potential": "0‑100"
   }
 }
-
-🧭 PROFILING CALIBRATION:
-- Pattern severity: 0–30 = habits, 31–60 = toxic, 61–80 = abusive, 81–100 = dangerous
-- Damage score: 0–30 = hurtful, 31–60 = harmful, 61–80 = trauma, 81–100 = devastation
-- Prediction confidence must be lowered if messages are vague, brief, or lacking timeline clarity
-- Safety beats virality. Never fake certainty. Always disclose ambiguity
 `;
   }
 
   // === MODE FLAVORING ===
   private static getModeFlavor(mode: "Intel" | "Narrative" | "Roast", archetype: string): string {
-    if (mode === "Intel") {
-      return `🎯 OUTPUT MODE: INTEL
-- Speak like a classified threat brief.
-- Focus on tactics, escalation, and control systems.
-- Archetype: "${archetype}"`;
-    }
-    if (mode === "Narrative") {
-      return `🎯 OUTPUT MODE: NARRATIVE
-- Speak like a Netflix true-crime narrator.
-- Unfold the pattern like a story arc.
-- Archetype: "${archetype}"`;
-    }
-    if (mode === "Roast") {
-      return `🎯 OUTPUT MODE: ROAST
-- Socially lethal but truthful.
-- Make it shareable & meme-worthy.
-- Archetype: "${archetype}"`;
-    }
-    return "";
-  }
-
-  // 🧠 RELATIONSHIP SPECIALIZATION
-  private static getRelationshipSpecialization(relationship: string): string {
-    const specs = {
-      'Partner': `
-INTIMATE PARTNER FOCUS:
-- Detect coercive control, trauma bonding, and isolation
-- Map cycles of intimacy manipulation and dependency creation
-- Flag escalation into stalking, violence, or psychological erosion`,
-
-      'Ex': `
-EX-PARTNER FOCUS:
-- Spot hoovering, harassment, or revenge spirals
-- Detect escalation caused by loss of control
-- Evaluate danger tied to unresolved attachment or ego injury`,
-
-      'Family': `
-FAMILY FOCUS:
-- Decode generational trauma and scapegoat/golden child dynamics
-- Detect emotional incest, boundary violations, and guilt manipulation
-- Flag inheritance, loyalty, or legacy-based control`,
-
-      'Friend': `
-FRIENDSHIP FOCUS:
-- Detect social triangulation, covert sabotage, and loyalty games
-- Identify passive control, emotional obligation, or betrayal patterns`,
-
-      'Coworker': `
-WORKPLACE FOCUS:
-- Map power abuse, reputation sabotage, and alliance manipulation
-- Detect HR-proof bullying and career retaliation patterns`,
-
-      'Date': `
-DATING FOCUS:
-- Spot fast-seduction, boundary testing, and persona-switching
-- Detect grooming, mirroring, and discard-risk triggers`,
-
-      'Roommate': `
-LIVING SITUATION FOCUS:
-- Detect boundary violations and passive-aggressive control
-- Map power dynamics in shared living spaces
-- Identify covert sabotage and emotional manipulation`,
-
-      'Stranger': `
-UNKNOWN PERSON FOCUS:
-- Detect grooming, fast-bonding, and trust exploitation
-- Map manipulation tactics from limited interaction
-- Identify red flags in brief encounters`,
-
-      'Boss': `
-AUTHORITY FIGURE FOCUS:
-- Detect power abuse and career manipulation
-- Map workplace bullying and reputation sabotage
-- Identify HR-proof control tactics`,
-
-      'Acquaintance': `
-CASUAL CONTACT FOCUS:
-- Detect social leverage and reputation games
-- Map subtle manipulation in casual relationships
-- Identify boundary testing and trust exploitation`
+    const modes = {
+      Intel: `🎯 MODE: Intel — Tactical threat brief. Clear, evidence‑based. Archetype: "${archetype}"`,
+      Narrative: `🎯 MODE: Narrative — Story‑driven escalation breakdown. Archetype: "${archetype}"`,
+      Roast: `🎯 MODE: Roast — Savage, viral, but truthful. Archetype: "${archetype}"`
     };
-
-    return specs[relationship as keyof typeof specs] || specs.Friend;
+    return modes[mode] || modes.Intel;
   }
 
-  // 🎨 TONE INSTRUCTION SYSTEM
+  // === TONE INSTRUCTIONS ===
   private static getToneInstructions(tone: string): string {
     const tones = {
-      'clinical': `
-TONE: CLINICAL
-- Objective psychological language
-- Keep emotional neutrality
-- Focus on observable behavior and pattern logic`,
-
-      'soft': `
-TONE: SOFT
-- Gentle but clear
-- Validate pain without overwhelming
-- Focus on safety, hope, and empowerment`,
-
-      'mature': `
-TONE: MATURE
-- Balanced and credible
-- Culturally sharp and nuanced
-- Focus on wisdom and perspective`,
-
-      'savage': `
-TONE: SAVAGE
-- Direct and unapologetic
-- Truthful but cutting
-- Focus on reality checks and wake-up calls`
+      brutal: `🔥 TONE: Brutal — Maximum exposure, no sugar‑coating.`,
+      serious: `⚖️ TONE: Serious — Firm, credible, culturally sharp.`,
+      clinical: `🧪 TONE: Clinical — Forensic, emotionally neutral.`,
+      compassionate: `💚 TONE: Compassionate — Gentle, validating.`
     };
-
-    return tones[tone as keyof typeof tones] || tones.clinical;
+    return tones[tone] || tones.serious;
   }
 } 
