@@ -46,6 +46,9 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: ^2.2.2
   smooth_page_indicator: ^1.2.1
+  
+  # URL launcher for Stripe checkout
+  url_launcher: ^6.2.4
 
 dev_dependencies:
   flutter_test:

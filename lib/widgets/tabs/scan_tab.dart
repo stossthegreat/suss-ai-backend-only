@@ -20,7 +20,7 @@ class _ScanTabState extends State<ScanTab> {
   String _selectedAnalysisGoal = 'instant_scan';
   String _selectedRelationship = 'Partner';
   String _selectedOutputMode = 'Intel';
-  String _selectedTone = 'Serious';
+  String _selectedTone = 'clinical';
   String _selectedCategory = 'dm';
   WhisperfireResponse? _analysis;
   bool _isAnalyzing = false;
@@ -41,6 +41,22 @@ class _ScanTabState extends State<ScanTab> {
     super.dispose();
   }
 
+  // Map UI output style to backend values
+  String _mapOutputStyleToBackend(String uiStyle) {
+    switch (uiStyle) {
+      case 'Intel':
+        return 'intel';
+      case 'Narrative':
+        return 'narrative';
+      case 'Roast':
+        return 'roast';
+      case 'Therapeutic':
+        return 'therapeutic';
+      default:
+        return 'intel';
+    }
+  }
+
   Future<void> _runScan() async {
     if (_textController.text.trim().isEmpty) return;
     
@@ -56,7 +72,7 @@ class _ScanTabState extends State<ScanTab> {
         contentType: _selectedCategory,
         analysisGoal: 'pattern_profiling', // Always use pattern_profiling
         relationship: _selectedRelationship,
-        outputStyle: _selectedOutputMode.toLowerCase(),
+        outputStyle: _mapOutputStyleToBackend(_selectedOutputMode),
         tone: _selectedTone.toLowerCase(),
       );
 

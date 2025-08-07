@@ -75,7 +75,7 @@ class _PatternTabState extends State<PatternTab> {
         contentType: 'dm',
         analysisGoal: 'pattern_profiling',
         relationship: _selectedRelationship,
-        outputStyle: _selectedOutputMode.toLowerCase(),
+        outputStyle: _mapOutputStyleToBackend(_selectedOutputMode),
         tone: _selectedTone.toLowerCase(),
         preferredModel: _selectedModel,
       );
@@ -129,6 +129,20 @@ class _PatternTabState extends State<PatternTab> {
         .length;
   }
 
+  // Map UI output style to backend values
+  String _mapOutputStyleToBackend(String uiStyle) {
+    switch (uiStyle) {
+      case 'Intel':
+        return 'intel';
+      case 'Narrative':
+        return 'narrative';
+      case 'Roast':
+        return 'roast';
+      default:
+        return 'intel';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -149,10 +163,6 @@ class _PatternTabState extends State<PatternTab> {
           
           // Output Style Selector
           _buildOutputStyleSelector(),
-          const SizedBox(height: 24),
-          
-          // Output Mode Selector
-          _buildOutputModeSelector(),
           const SizedBox(height: 24),
           
           // Tone Selector
@@ -406,6 +416,7 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
+  // OUTPUT STYLE SELECTOR - Button-based selector (removed dropdown)
   Widget _buildOutputStyleSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,9 +454,9 @@ class _PatternTabState extends State<PatternTab> {
                       width: 2,
                     ),
                   ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         children: [
                           Icon(
@@ -481,21 +492,21 @@ class _PatternTabState extends State<PatternTab> {
               ),
             ),
             const SizedBox(width: 12),
-                Expanded(
+            Expanded(
               child: GestureDetector(
-                  onTap: () {
+                onTap: () {
                   setState(() {
                     _selectedOutputMode = 'Narrative';
                   });
-                  },
-                  child: Container(
+                },
+                child: Container(
                   padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                     color: _selectedOutputMode == 'Narrative'
                         ? AppColors.primaryCyan.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                    border: Border.all(
                       color: _selectedOutputMode == 'Narrative'
                           ? AppColors.primaryCyan
                           : AppColors.borderGray600,
@@ -506,8 +517,8 @@ class _PatternTabState extends State<PatternTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                      children: [
-                        Icon(
+                        children: [
+                          Icon(
                             Icons.article,
                             color: _selectedOutputMode == 'Narrative'
                                 ? AppColors.primaryCyan
@@ -515,9 +526,9 @@ class _PatternTabState extends State<PatternTab> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                        Text(
+                          Text(
                             'Narrative',
-                          style: TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: _selectedOutputMode == 'Narrative'
                                   ? AppColors.primaryCyan
@@ -532,9 +543,9 @@ class _PatternTabState extends State<PatternTab> {
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
-                          ),
                         ),
-                      ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -549,23 +560,23 @@ class _PatternTabState extends State<PatternTab> {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                     color: _selectedOutputMode == 'Roast'
                         ? AppColors.warningOrange.withOpacity(0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-        border: Border.all(
+                    border: Border.all(
                       color: _selectedOutputMode == 'Roast'
                           ? AppColors.warningOrange
                           : AppColors.borderGray600,
-          width: 2,
-        ),
-      ),
-      child: Column(
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-        children: [
+                        children: [
                           Icon(
                             Icons.local_fire_department,
                             color: _selectedOutputMode == 'Roast'
@@ -574,81 +585,31 @@ class _PatternTabState extends State<PatternTab> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-          Text(
+                          Text(
                             'Roast',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
                               color: _selectedOutputMode == 'Roast'
                                   ? AppColors.warningOrange
                                   : AppColors.textWhite,
-            ),
+                            ),
                           ),
                         ],
-          ),
-          const SizedBox(height: 4),
-          Text(
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
                         'Viral & savage',
-            style: TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textGray400,
-            ),
-          ),
-        ],
-      ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
-        ),
-      ],
-    );
-  }
-
-  // OUTPUT MODE SELECTOR
-  Widget _buildOutputModeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'OUTPUT STYLE',
-          style: TextStyle(
-            color: AppColors.textGray400,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderGray700),
-            color: AppColors.backgroundGray800,
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedOutputMode,
-              isExpanded: true,
-              dropdownColor: AppColors.backgroundGray800,
-          style: const TextStyle(
-            color: Colors.white,
-                fontSize: 16,
-              ),
-              items: AppConstants.outputModes.map((mode) {
-                return DropdownMenuItem<String>(
-                  value: mode,
-                  child: Text(mode),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedOutputMode = value;
-                  });
-                }
-              },
-            ),
-          ),
         ),
       ],
     );
@@ -791,7 +752,7 @@ class _PatternTabState extends State<PatternTab> {
             contentType: 'dm',
             analysisGoal: 'pattern_profiling',
             relationship: _selectedRelationship,
-            outputStyle: _selectedOutputMode.toLowerCase(),
+            outputStyle: _mapOutputStyleToBackend(_selectedOutputMode),
             tone: _selectedTone.toLowerCase(),
             preferredModel: _selectedModel,
           );
@@ -822,23 +783,37 @@ class _PatternTabState extends State<PatternTab> {
     );
   }
 
-  // 🧠 PATTERN RESULTS - Comprehensive Behavioral Intelligence Report
+  // 🧠 PATTERN RESULTS - Different styles based on output mode
   Widget _buildPatternResults() {
     final patternResult = _analysis!.patternResult!;
     
+    switch (_selectedOutputMode) {
+      case 'Intel':
+        return _buildIntelResults(patternResult);
+      case 'Narrative':
+        return _buildNarrativeResults(patternResult);
+      case 'Roast':
+        return _buildRoastResults(patternResult);
+      default:
+        return _buildIntelResults(patternResult);
+    }
+  }
+
+  // 🎯 INTEL RESULTS - Tactical, factual analysis
+  Widget _buildIntelResults(WhisperfirePatternResult patternResult) {
     return ResultCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with Intelligence Theme
+          // Intel Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: AppColors.borderGray600,
-                  width: 0.5,
+                  color: AppColors.primaryPink,
+                  width: 2,
                 ),
               ),
             ),
@@ -849,9 +824,9 @@ class _PatternTabState extends State<PatternTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '⚡ PATTERN.AI - BEHAVIORAL INTELLIGENCE REPORT',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        '🎯 INTELLIGENCE REPORT',
+                        style: TextStyle(
+                          color: AppColors.primaryPink,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           height: 1.3,
@@ -859,7 +834,7 @@ class _PatternTabState extends State<PatternTab> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Advanced Psychological Threat Analysis',
+                        'Tactical Threat Analysis',
                         style: TextStyle(
                           color: AppColors.textGray400,
                           fontSize: 14,
@@ -868,45 +843,22 @@ class _PatternTabState extends State<PatternTab> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Share Button
-                GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Share feature coming soon!'),
-                        backgroundColor: AppColors.primaryPink,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryPink.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primaryPink,
-                        width: 1,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPink.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primaryPink,
+                      width: 1,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.share,
-                          color: AppColors.primaryPink,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Share',
-                          style: TextStyle(
-                            color: AppColors.primaryPink,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  ),
+                  child: Text(
+                    'CONFIDENCE: ${patternResult.confidenceMetrics.analysisConfidence}%',
+                    style: TextStyle(
+                      color: AppColors.primaryPink,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -915,158 +867,266 @@ class _PatternTabState extends State<PatternTab> {
           ),
           const SizedBox(height: 24),
           
-          // Behavioral Profile Section
-          _buildIntelligenceSection(
-            '🎭 BEHAVIORAL PROFILE',
+          // Threat Assessment
+          _buildIntelSection(
+            '🚨 THREAT ASSESSMENT',
             [
               'Headline: "${patternResult.behavioralProfile.headline}"',
               'Archetype: "${patternResult.behavioralProfile.manipulatorArchetype}"',
-              'Dominant Pattern: "${patternResult.behavioralProfile.dominantPattern}"',
-              'Sophistication Level: ${patternResult.behavioralProfile.manipulationSophistication}/100',
+              'Pattern Severity: ${patternResult.patternAnalysis.patternSeverityScore}/100',
+              'Risk Level: ${patternResult.riskAssessment.interventionUrgency}',
             ],
             AppColors.primaryPink,
           ),
           const SizedBox(height: 20),
           
-          // Pattern Analysis Section
-          _buildIntelligenceSection(
-            '🔄 PATTERN ANALYSIS',
+          // Tactical Analysis
+          _buildIntelSection(
+            '⚡ TACTICAL ANALYSIS',
             [
               'Manipulation Cycle: "${patternResult.patternAnalysis.manipulationCycle}"',
-              'Pattern Severity: ${patternResult.patternAnalysis.patternSeverityScore}/100',
-              'Escalation Timeline: "${patternResult.patternAnalysis.escalationTimeline}"',
-              'Trigger Events: ${patternResult.patternAnalysis.triggerEvents.length} identified',
+              'Escalation Probability: ${patternResult.riskAssessment.escalationProbability}%',
+              'Psychological Damage: ${patternResult.psychologicalAssessment.psychologicalDamageScore}/100',
+              'Reality Distortion: ${patternResult.psychologicalAssessment.realityDistortionLevel}%',
             ],
             AppColors.primaryPurple,
           ),
           const SizedBox(height: 20),
           
-          // Psychological Assessment Section
-          _buildIntelligenceSection(
-            '🧠 PSYCHOLOGICAL ASSESSMENT',
-            [
-              'Primary Agenda: "${patternResult.psychologicalAssessment.primaryAgenda}"',
-              'Emotional Damage: "${patternResult.psychologicalAssessment.emotionalDamageInflicted}"',
-              'Reality Distortion: ${patternResult.psychologicalAssessment.realityDistortionLevel}%',
-              'Psychological Damage Score: ${patternResult.psychologicalAssessment.psychologicalDamageScore}/100',
-            ],
-            AppColors.warningOrange,
-          ),
-          const SizedBox(height: 20),
-          
-          // Risk Assessment Section
-          _buildIntelligenceSection(
-            '🚨 RISK ASSESSMENT',
-            [
-              'Escalation Probability: ${patternResult.riskAssessment.escalationProbability}%',
-              'Intervention Urgency: ${patternResult.riskAssessment.interventionUrgency}',
-              'Relationship Prognosis: "${patternResult.riskAssessment.relationshipPrognosis}"',
-              'Future Behavior: "${patternResult.riskAssessment.futureBehaviorPrediction}"',
-            ],
-            AppColors.dangerRed,
-          ),
-          const SizedBox(height: 20),
-          
-          // Strategic Recommendations Section
-          _buildIntelligenceSection(
+          // Strategic Recommendations
+          _buildIntelSection(
             '🛡️ STRATEGIC RECOMMENDATIONS',
-            [
-              'Boundary Strategy: "${patternResult.strategicRecommendations.boundaryEnforcementStrategy}"',
-              'Communication Guidelines: "${patternResult.strategicRecommendations.communicationGuidelines}"',
-              'Escape Strategy: "${patternResult.strategicRecommendations.escapeStrategy}"',
-              'Safety Planning: "${patternResult.strategicRecommendations.safetyPlanning}"',
-            ],
-            AppColors.successGreen,
-          ),
-          const SizedBox(height: 20),
-          
-          // Viral Insights Section
-          _buildIntelligenceSection(
-            '🔥 VIRAL INSIGHTS',
-            [
-              'Suss Verdict: "${patternResult.viralInsights.sussVerdict}"',
-              'Life-Saving Insight: "${patternResult.viralInsights.lifeSavingInsight}"',
-              'Pattern Summary: "${patternResult.viralInsights.patternSummary}"',
-              'Gut Validation: "${patternResult.viralInsights.gutValidation}"',
-            ],
+            patternResult.strategicRecommendations.patternDisruptionTactics,
             AppColors.primaryCyan,
           ),
           const SizedBox(height: 20),
           
-          // Confidence Metrics Section
-          _buildIntelligenceSection(
-            '📊 CONFIDENCE METRICS',
-            [
-              'Analysis Confidence: ${patternResult.confidenceMetrics.analysisConfidence}%',
-              'Prediction Confidence: ${patternResult.confidenceMetrics.predictionConfidence}%',
-              'Evidence Quality: ${patternResult.confidenceMetrics.evidenceQuality}',
-              'Viral Potential: ${patternResult.confidenceMetrics.viralPotential}/100',
-            ],
-            AppColors.primaryPurple,
-          ),
-          const SizedBox(height: 24),
-          
           // Final Assessment
           _buildFinalAssessment(patternResult),
-          const SizedBox(height: 24),
-          
-          // Premium Branding
-          _buildPremiumBranding(),
         ],
       ),
     );
   }
 
-  // 🎯 INTELLIGENCE SECTION BUILDER
-  Widget _buildIntelligenceSection(String title, List<String> items, Color accentColor) {
+  // 📖 NARRATIVE RESULTS - Story-driven analysis
+  Widget _buildNarrativeResults(WhisperfirePatternResult patternResult) {
+    return ResultCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Narrative Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.primaryCyan,
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📖 PATTERN NARRATIVE',
+                        style: TextStyle(
+                          color: AppColors.primaryCyan,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Story-driven Behavioral Analysis',
+                        style: TextStyle(
+                          color: AppColors.textGray400,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // Story Introduction
+          _buildNarrativeSection(
+            '🎭 THE CHARACTER',
+            [
+              'Meet "${patternResult.behavioralProfile.headline}"',
+              'This person operates as a "${patternResult.behavioralProfile.manipulatorArchetype}"',
+              'Their dominant pattern: "${patternResult.behavioralProfile.dominantPattern}"',
+            ],
+            AppColors.primaryCyan,
+          ),
+          const SizedBox(height: 20),
+          
+          // The Plot
+          _buildNarrativeSection(
+            '📖 THE PLOT',
+            [
+              'The manipulation cycle: "${patternResult.patternAnalysis.manipulationCycle}"',
+              'Escalation timeline: "${patternResult.patternAnalysis.escalationTimeline}"',
+              'Trigger events: ${patternResult.patternAnalysis.triggerEvents.join(", ")}',
+            ],
+            AppColors.primaryPurple,
+          ),
+          const SizedBox(height: 20),
+          
+          // The Impact
+          _buildNarrativeSection(
+            '💥 THE IMPACT',
+            [
+              'Primary agenda: "${patternResult.psychologicalAssessment.primaryAgenda}"',
+              'Emotional damage: "${patternResult.psychologicalAssessment.emotionalDamageInflicted}"',
+              'Power methods: ${patternResult.psychologicalAssessment.powerControlMethods.join(", ")}',
+            ],
+            AppColors.primaryPink,
+          ),
+          const SizedBox(height: 20),
+          
+          // The Resolution
+          _buildNarrativeSection(
+            '🎬 THE RESOLUTION',
+            [
+              'Boundary strategy: "${patternResult.strategicRecommendations.boundaryEnforcementStrategy}"',
+              'Communication guidelines: "${patternResult.strategicRecommendations.communicationGuidelines}"',
+              'Safety planning: "${patternResult.strategicRecommendations.safetyPlanning}"',
+            ],
+            AppColors.warningOrange,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🔥 ROAST RESULTS - Savage but truthful
+  Widget _buildRoastResults(WhisperfirePatternResult patternResult) {
+    return ResultCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Roast Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.warningOrange,
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '🔥 VIRAL ROAST ANALYSIS',
+                        style: TextStyle(
+                          color: AppColors.warningOrange,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Savage but Truthful Breakdown',
+                        style: TextStyle(
+                          color: AppColors.textGray400,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          // The Roast
+          _buildRoastSection(
+            '🔥 THE ROAST',
+            [
+              '${patternResult.viralInsights.sussVerdict}',
+              '${patternResult.viralInsights.lifeSavingInsight}',
+              '${patternResult.viralInsights.patternSummary}',
+              '${patternResult.viralInsights.gutValidation}',
+            ],
+            AppColors.warningOrange,
+          ),
+          const SizedBox(height: 20),
+          
+          // The Breakdown
+          _buildRoastSection(
+            '💀 THE BREAKDOWN',
+            [
+              'This "${patternResult.behavioralProfile.headline}" is running a "${patternResult.patternAnalysis.manipulationCycle}"',
+              'Sophistication level: ${patternResult.behavioralProfile.manipulationSophistication}/100 (pathetic)',
+              'Reality distortion: ${patternResult.psychologicalAssessment.realityDistortionLevel}% (delusional)',
+              'Psychological damage score: ${patternResult.psychologicalAssessment.psychologicalDamageScore}/100 (toxic)',
+            ],
+            AppColors.primaryPink,
+          ),
+          const SizedBox(height: 20),
+          
+          // The Comeback
+          _buildRoastSection(
+            '🗡️ THE COMEBACK',
+            [
+              'Boundary enforcement: "${patternResult.strategicRecommendations.boundaryEnforcementStrategy}"',
+              'Escape strategy: "${patternResult.strategicRecommendations.escapeStrategy}"',
+              'Pattern disruption: ${patternResult.strategicRecommendations.patternDisruptionTactics.join(", ")}',
+            ],
+            AppColors.primaryPurple,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method for Intel sections
+  Widget _buildIntelSection(String title, List<String> items, Color color) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGray800.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-        border: Border.all(
-          color: accentColor.withOpacity(0.3),
-          width: 1,
-        ),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: accentColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ...items.map((item) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  margin: const EdgeInsets.only(top: 6, right: 12),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    shape: BoxShape.circle,
-                  ),
+                Text(
+                  '• ',
+                  style: TextStyle(color: color, fontSize: 16),
                 ),
                 Expanded(
                   child: Text(
@@ -1074,71 +1134,130 @@ class _PatternTabState extends State<PatternTab> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
-                      height: 1.4,
                     ),
                   ),
                 ),
               ],
             ),
-          )).toList(),
+          )),
         ],
       ),
     );
   }
 
-  // 🎯 FINAL ASSESSMENT
-  Widget _buildFinalAssessment(WhisperfirePatternResult patternResult) {
-    final severityScore = patternResult.patternAnalysis.patternSeverityScore;
-    final isHighRisk = severityScore >= 60;
-    final isCritical = severityScore >= 80;
-    
+  // Helper method for Narrative sections
+  Widget _buildNarrativeSection(String title, List<String> items, Color color) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: isCritical 
-            ? LinearGradient(colors: [AppColors.dangerRed, AppColors.dangerRed.withOpacity(0.8)])
-            : isHighRisk
-                ? LinearGradient(colors: [AppColors.warningOrange, AppColors.warningOrange.withOpacity(0.8)])
-                : LinearGradient(colors: [AppColors.successGreen, AppColors.successGreen.withOpacity(0.8)]),
-        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-        border: Border.all(
-          color: isCritical 
-              ? AppColors.dangerRed.withOpacity(0.3)
-              : isHighRisk
-                  ? AppColors.warningOrange.withOpacity(0.3)
-                  : AppColors.successGreen.withOpacity(0.3),
-          width: 2,
-        ),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                isCritical ? Icons.warning : isHighRisk ? Icons.info : Icons.check_circle,
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              item,
+              style: const TextStyle(
                 color: Colors.white,
-                size: 24,
+                fontSize: 14,
+                height: 1.4,
               ),
-              const SizedBox(width: 12),
-              Text(
-                isCritical ? '🚨 CRITICAL THREAT DETECTED' : isHighRisk ? '⚠️ HIGH RISK PATTERN' : '✅ MODERATE RISK',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  // Helper method for Roast sections
+  Widget _buildRoastSection(String title, List<String> items, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '🔥 ',
+                  style: TextStyle(color: color, fontSize: 16),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  // Final assessment for Intel mode
+  Widget _buildFinalAssessment(WhisperfirePatternResult patternResult) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryPink.withOpacity(0.2),
+            AppColors.primaryPurple.withOpacity(0.2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primaryPink.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '🎯 FINAL ASSESSMENT',
+            style: TextStyle(
+              color: AppColors.primaryPink,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
-            isCritical 
-                ? 'This pattern indicates severe psychological manipulation requiring immediate intervention.'
-                : isHighRisk
-                    ? 'This pattern shows concerning manipulation tactics that require attention.'
-                    : 'This pattern shows some concerning elements but may be manageable.',
+            'This individual exhibits ${patternResult.behavioralProfile.manipulationSophistication >= 70 ? 'highly sophisticated' : patternResult.behavioralProfile.manipulationSophistication >= 40 ? 'moderately sophisticated' : 'basic'} manipulation patterns with a ${patternResult.riskAssessment.interventionUrgency.toLowerCase()} intervention urgency. ${patternResult.viralInsights.lifeSavingInsight}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,

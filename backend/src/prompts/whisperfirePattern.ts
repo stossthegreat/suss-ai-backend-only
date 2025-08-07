@@ -34,6 +34,26 @@ export class PatternProfilingWeapon {
       Intel: ["Persona-Switch Seducer", "Boundary Pressure Tester", "Fast-Bond Exploiter"],
       Narrative: ["The Candlelight Chameleon", "The Date Who Mirrors Your Soul Until They Own It", "The Future-Faking Showman"],
       Roast: ["Walking Dating App Red Flag", "Love-Bomb Speedrunner", "Charm Offensive Dropout"]
+    },
+    Roommate: {
+      Intel: ["Boundary Violation Specialist", "Passive-Aggressive Controller", "Shared Space Saboteur"],
+      Narrative: ["The Silent Treatment Master", "The Passive-Aggressive Note Leaver", "The Shared Space Tyrant"],
+      Roast: ["Passive-Aggressive Post-It Note Artist", "Silent Treatment Olympic Champion", "Shared Fridge Dictator"]
+    },
+    Stranger: {
+      Intel: ["Fast-Bond Exploiter", "Trust Grooming Specialist", "Red Flag Distributor"],
+      Narrative: ["The Charming Predator", "The Trust Vampire", "The Red Flag Salesman"],
+      Roast: ["Walking Red Flag Parade", "Trust Vampire in Disguise", "Charm Offensive Dropout"]
+    },
+    Boss: {
+      Intel: ["Power Abuse Architect", "Career Sabotage Specialist", "HR-Proof Bully"],
+      Narrative: ["The Promotion Gatekeeper", "The Corporate Gaslighter", "The Power Trip Conductor"],
+      Roast: ["Power Trip Conductor", "Corporate Gaslighter Extraordinaire", "Promotion Gatekeeper Supreme"]
+    },
+    Acquaintance: {
+      Intel: ["Social Leverage Player", "Reputation Game Master", "Boundary Tester"],
+      Narrative: ["The Social Spy", "The Reputation Chess Player", "The Casual Manipulator"],
+      Roast: ["Social Spy Extraordinaire", "Reputation Chess Master", "Casual Manipulation Artist"]
     }
   };
 
@@ -231,7 +251,31 @@ WORKPLACE FOCUS:
       'Date': `
 DATING FOCUS:
 - Spot fast-seduction, boundary testing, and persona-switching
-- Detect grooming, mirroring, and discard-risk triggers`
+- Detect grooming, mirroring, and discard-risk triggers`,
+
+      'Roommate': `
+LIVING SITUATION FOCUS:
+- Detect boundary violations and passive-aggressive control
+- Map power dynamics in shared living spaces
+- Identify covert sabotage and emotional manipulation`,
+
+      'Stranger': `
+UNKNOWN PERSON FOCUS:
+- Detect grooming, fast-bonding, and trust exploitation
+- Map manipulation tactics from limited interaction
+- Identify red flags in brief encounters`,
+
+      'Boss': `
+AUTHORITY FIGURE FOCUS:
+- Detect power abuse and career manipulation
+- Map workplace bullying and reputation sabotage
+- Identify HR-proof control tactics`,
+
+      'Acquaintance': `
+CASUAL CONTACT FOCUS:
+- Detect social leverage and reputation games
+- Map subtle manipulation in casual relationships
+- Identify boundary testing and trust exploitation`
     };
 
     return specs[relationship as keyof typeof specs] || specs.Friend;

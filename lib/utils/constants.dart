@@ -137,7 +137,6 @@ class AppConstants {
 
   // TONE OPTIONS - Updated to match backend expectations
   static const List<String> toneOptions = [
-    'brutal',        // Maximum exposure, no sugar-coating
     'soft',          // Gentle, validating
     'clinical',      // Forensic, emotionally neutral
     'mature',        // Balanced, credible, culturally sharp
@@ -170,11 +169,9 @@ class AppConstants {
     TabItem(id: 'settings', label: 'Settings', iconData: 'settings'),
   ];
 
-  // AI Models
+  // AI Models - Updated to only include gpt-4-turbo and deepseek-v3
   static const List<String> models = [
     'gpt-4-turbo',
-    'claude-3-opus',
-    'claude-3-sonnet',
     'deepseek-v3',
   ];
 
