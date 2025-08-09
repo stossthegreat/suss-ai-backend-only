@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  title: Whisperfire API
+  description: Real-time psychological insight engine for analyzing manipulation tactics
+  version: 1.0.0
+  contact:
+    name: Whisperfire Support
+servers:
+  - url: https://api.whisperfire.ai
+    description: Production server
+  - url: http://localhost:8080
+    description: Development server
+
+paths:
+  /api/v1/analyze:
+    post:
+      summary: Analyze message for manipulation tactics
+      description: Analyze a message or conversation for psychological manipulation patterns
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tab, relationship, tone, content_type]
+              properties:
+                tab:
+                  type: string
+                  enum: [scan, comeback, pattern]
+                  description: Analysis type
+                relationship:
+                  type: string
+                  enum: [Partner, Ex, Date, Friend, Coworker, Family, Roommate, Stranger]
+                  description: Relationship context
+                tone:
+                  type: string
+                  enum: [savage, soft, clinical]
+                  description: Analysis tone
+                content_type:
+                  type: string
+                  enum: [dm, bio, story, post]
+                  description: Content type
+                subject_name:
+                  type: string
+                  nullable: true
+                  description: Subject name (optional)
+                message:
+                  type: string
+                  description: Single message (required for scan/comeback)
+                messages:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 2
+                  description: Message array (required for pattern)
+            examples:
+              scan:
+                summary: Scan analysis
+                value:
+                  tab: scan
+                  relationship: Partner
+                  tone: clinical
+                  content_type: dm
+                  subject_name: "Alex"
+                  message: "Why are you always so sensitive about everything?"
+              comeback:
+                summary: Comeback generation
+                value:
+                  tab: comeback
+                  relationship: Ex
+                  tone: savage
+                  content_type: dm
+                  subject_name: "Jordan"
+                  message: "You're just being dramatic again"
+              pattern:
+                summary: Pattern analysis
+                value:
+                  tab: pattern
+                  relationship: Coworker
+                  tone: soft
+                  content_type: dm
+                  subject_name: "Sam"
+                  messages:
+                    - "Can you cover my shift again?"
+                    - "I know you're busy but I really need this"
+                    - "You're always so reliable"
+      responses:
+        '200':
+          description: Successful analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/WhisperfireOutput'
+                  processing_time:
+                    type: number
+                    description: Processing time in milliseconds
+                    example: 1250
+                  model_used:
+                    type: string
+                    example: "deepseek-chat"
+        '400':
+          description: Bad request - missing or invalid fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Missing required fields"
+        '401':
+          description: Unauthorized - invalid API key
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+
+  /api/v1/health:
+    get:
+      summary: Health check
+      description: Check API health status
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    description: Uptime in seconds
+
+  /api/v1/metrics:
+    get:
+      summary: Prometheus metrics
+      description: Get Prometheus-formatted metrics
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api/v1/openapi.yaml:
+    get:
+      summary: OpenAPI specification
+      description: Get this OpenAPI specification
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+components:
+  schemas:
+    WhisperfireOutput:
+      type: object
+      required:
+        - context
+        - headline
+        - core_take
+        - tactic
+        - motives
+        - targeting
+        - power_play
+        - receipts
+        - next_moves
+        - suggested_reply
+        - safety
+        - metrics
+        - pattern
+        - ambiguity
+      properties:
+        context:
+          type: object
+          required: [relationship, tone, content_type, subject_name, tab]
+          properties:
+            relationship:
+              type: string
+              enum: [Partner, Ex, Date, Friend, Coworker, Family, Roommate, Stranger]
+            tone:
+              type: string
+              enum: [savage, soft, clinical]
+            content_type:
+              type: string
+              enum: [dm, bio, story, post]
+            subject_name:
+              type: string
+              nullable: true
+            tab:
+              type: string
+              enum: [scan, comeback, pattern]
+        headline:
+          type: string
+          maxLength: 120
+        core_take:
+          type: string
+          maxLength: 500
+        tactic:
+          type: object
+          required: [label, confidence]
+          properties:
+            label:
+              type: string
+              enum:
+                - Gaslighting
+                - Guilt Tripping
+                - Deflection
+                - DARVO
+                - Passive Aggression
+                - Love Bombing
+                - Breadcrumbing
+                - Shaming
+                - Silent Treatment
+                - Control Test
+                - Triangulation
+                - Emotional Baiting
+                - Future Faking
+                - Hoovering
+                - None Detected
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 100
+        motives:
+          type: string
+          maxLength: 200
+        targeting:
+          type: string
+          maxLength: 120
+        power_play:
+          type: string
+          maxLength: 120
+        receipts:
+          type: array
+          items:
+            type: string
+          minItems: 2
+          maxItems: 4
+        next_moves:
+          type: string
+          maxLength: 120
+        suggested_reply:
+          type: object
+          required: [style, text]
+          properties:
+            style:
+              type: string
+              enum: [clipped, one_liner, reverse_uno, screenshot_bait, monologue]
+            text:
+              type: string
+              maxLength: 300
+        safety:
+          type: object
+          required: [risk_level, notes]
+          properties:
+            risk_level:
+              type: string
+              enum: [LOW, MODERATE, HIGH, CRITICAL]
+            notes:
+              type: string
+              maxLength: 200
+        metrics:
+          type: object
+          required: [red_flag, certainty, viral_potential]
+          properties:
+            red_flag:
+              type: number
+              minimum: 0
+              maximum: 100
+            certainty:
+              type: number
+              minimum: 0
+              maximum: 100
+            viral_potential:
+              type: number
+              minimum: 0
+              maximum: 100
+        pattern:
+          type: object
+          required: [cycle, prognosis]
+          properties:
+            cycle:
+              type: string
+              nullable: true
+              maxLength: 200
+            prognosis:
+              type: string
+              nullable: true
+              maxLength: 200
+        ambiguity:
+          type: object
+          required: [warning]
+          properties:
+            warning:
+              type: string
+              nullable: true
+              maxLength: 200
+            missing_evidence:
+              type: array
+              items:
+                type: string
+              nullable: true
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key in format "Bearer YOUR_API_KEY"
+
+security:
+  - ApiKeyAuth: [] 

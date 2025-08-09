@@ -1,0 +1,12 @@
+[build]
+builder = "NIXPACKS"
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[variables]
+NODE_ENV = "production"
+PORT = "8080"
+
+[service]
+internal_port = 8080 
