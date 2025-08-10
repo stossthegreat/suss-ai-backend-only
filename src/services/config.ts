@@ -7,7 +7,7 @@ const Env = z.object({
   // Models
   OPENAI_API_KEY: z.string().min(10, 'Missing OPENAI_API_KEY'),
   DEEPSEEK_API_KEY: z.string().min(10, 'Missing DEEPSEEK_API_KEY'),
-  PRIMARY_MODEL: z.string().default('deepseek-chat'),
+  PRIMARY_MODEL: z.string().default('deepseek-ai/deepseek-chat'),
   FALLBACK_MODEL: z.string().default('gpt-4o-mini'),
 
   // Auth

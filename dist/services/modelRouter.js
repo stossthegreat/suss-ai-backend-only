@@ -6,7 +6,10 @@ import { modelCalls } from './metrics.js';
 import { flags } from './flags.js';
 import { cfg } from './config.js';
 const openai = new OpenAI({ apiKey: cfg.OPENAI_API_KEY });
-const deepseek = new OpenAI({ apiKey: cfg.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
+const deepseek = new OpenAI({
+    apiKey: cfg.DEEPSEEK_API_KEY,
+    baseURL: 'https://api.together.xyz/v1'
+});
 async function callLLM(client, { system, user, model }) {
     try {
         const res = await client.chat.completions.create({

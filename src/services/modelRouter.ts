@@ -7,7 +7,10 @@ import { flags } from './flags.js';
 import { cfg } from './config.js';
 
 const openai = new OpenAI({ apiKey: cfg.OPENAI_API_KEY });
-const deepseek = new OpenAI({ apiKey: cfg.DEEPSEEK_API_KEY, baseURL: 'https://api.deepseek.com' });
+const deepseek = new OpenAI({ 
+  apiKey: cfg.DEEPSEEK_API_KEY, 
+  baseURL: 'https://api.together.xyz/v1' 
+});
 
 type ChatArgs = { system: string; user: string; model: string };
 
