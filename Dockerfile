@@ -1,29 +1,33 @@
-# ---------- builder ----------
+# syntax=docker/dockerfile:1
+
+########### Builder: install dev deps and compile TS ###########
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install ALL deps (incl. dev) so tsc exists
+# Only package files first for better caching
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and build
+# Copy the rest and build
 COPY . .
 RUN npm run build
 
-# ---------- runner ----------
+########### Runner: prod deps only + compiled JS ###########
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install ONLY prod deps
+# Prod deps only for small runtime
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Bring in compiled JS only
+# Bring compiled JS from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose port (matches your cfg.PORT default 3000 in Railway)
-EXPOSE 3000
+# If your app reads openapi.yaml or other runtime assets from CWD, copy them:
+# (ignore if not present)
+COPY openapi.yaml ./  || true
 
-# Run the compiled server directly (bypasses any npm prestart hooks)
+# Railway injects PORT; your server already reads cfg.PORT
+EXPOSE 3000
 CMD ["node", "dist/server.js"]
