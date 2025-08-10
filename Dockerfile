@@ -1,30 +1,29 @@
-# ---------- build stage ----------
-FROM node:20-alpine AS build
+# ---------- builder ----------
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install prod deps (no dev) for smaller image
+# Install ALL deps (incl. dev) so tsc exists
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
-# Compile TypeScript -> dist/
+# Copy source and build
 COPY . .
 RUN npm run build
 
-# ---------- runtime stage ----------
-FROM node:20-alpine AS runtime
+# ---------- runner ----------
+FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install only prod deps again in a clean layer
+# Install ONLY prod deps
 COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
-# Bring in build artifacts & any non-TS assets you serve
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/openapi.yaml ./openapi.yaml
+# Bring in compiled JS only
+COPY --from=builder /app/dist ./dist
 
-# Railway sets PORT; our server reads cfg.PORT, default 8080
-EXPOSE 8080
+# Expose port (matches your cfg.PORT default 3000 in Railway)
+EXPOSE 3000
 
-# IMPORTANT: start the server (runs "prestart" then "start")
-CMD ["npm","start"]
+# Run the compiled server directly (bypasses any npm prestart hooks)
+CMD ["node", "dist/server.js"]
