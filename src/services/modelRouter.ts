@@ -6,7 +6,9 @@ import { modelCalls } from './metrics.js';
 import { flags } from './flags.js';
 import { cfg } from './config.js';
 
-// Clients (OpenAI and Together/OpenAI-compatible)
+// ————————————————————————————————————————————————
+// Clients (OpenAI + Together/OpenAI-compatible)
+// ————————————————————————————————————————————————
 if (!cfg.OPENAI_API_KEY) {
   console.warn('⚠️  OpenAI client will not be available - OPENAI_API_KEY is missing');
 }
@@ -26,7 +28,7 @@ async function callLLM(client: OpenAI, { system, user, model }: ChatArgs) {
   try {
     const res = await client.chat.completions.create({
       model,
-      response_format: { type: 'json_object' },
+      response_format: { type: 'json_object' }, // force pure JSON
       temperature: 0.2,
       top_p: 1,
       max_tokens: 1800,
@@ -47,12 +49,14 @@ function safeJSON(str: string) {
   if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
     try { return JSON.parse(trimmed); } catch {}
   }
-  const m = str.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-  if (m) { try { return JSON.parse(m[1]); } catch {} }
+  const jsonMatch = str.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[1]); } catch {}
+  }
   try { return JSON.parse(str); } catch { return null; }
 }
 
-// Extract context from user prompt (supports CONTEXT: {...} or legacy headers)
+// Extract context from the user prompt (supports both old "TAB:" lines and new "CONTEXT: {...}")
 function extractContextFromUser(user: string) {
   try {
     const m = user.match(/CONTEXT:\s*(\{[\s\S]*?\})/);
@@ -67,6 +71,7 @@ function extractContextFromUser(user: string) {
       };
     }
   } catch {}
+  // Fallback: parse legacy header lines
   const pick = (label: string, def: string|null) => {
     const re = new RegExp(`^${label}:\\s*(.+)$`, 'mi');
     const mm = user.match(re);
@@ -81,42 +86,72 @@ function extractContextFromUser(user: string) {
   };
 }
 
-// Coerce/normalize liberal LLM output into strict schema
+// ————————————————————————————————————————————————
+// Normalization layer -> force strict schema BEFORE zod
+// ————————————————————————————————————————————————
 function normalize(json: any, expectedCtx: any) {
   const upper = (s?: string) => (s || '').toUpperCase();
+  const lower = (s?: string) => (s || '').toLowerCase();
   const clamp01 = (n: any) => {
     const v = typeof n === 'boolean' ? (n ? 1 : 0) : Number(n ?? 0);
     return Math.max(0, Math.min(1, isFinite(v) ? v : 0));
   };
   const arr = (v: any) => v == null ? [] : Array.isArray(v) ? v : [v];
 
-  const allowed = [
+  // Map tactic labels to allowed set
+  const allowedTactics = [
     'Gaslighting','Guilt Tripping','Deflection','DARVO','Passive Aggression',
     'Love Bombing','Breadcrumbing','Shaming','Silent Treatment','Control Test',
     'Triangulation','Emotional Baiting','Future Faking','Hoovering','None Detected'
   ];
-  const map: Record<string,string> = {
+  const tacticMap: Record<string,string> = {
     'appeasement':'None Detected',
     'accountability':'None Detected',
     'apology':'None Detected',
     'apology and reconciliation':'None Detected',
-    'defensiveness':'None Detected',
     'stonewalling':'Silent Treatment',
     'withholding':'Silent Treatment',
-    'threat':'Emotional Baiting'
+    'threat':'Emotional Baiting',
+    'defensiveness':'Deflection',
+    'defensive accusation':'Deflection',
+    'dichotomous blame-shifting':'Deflection'
   };
-  const labelIn = String(json?.tactic?.label || '').toLowerCase();
-  const mappedLabel = allowed.includes(json?.tactic?.label)
+  const labelIn = lower(json?.tactic?.label || '');
+  const tacticLabel = allowedTactics.includes(json?.tactic?.label)
     ? json?.tactic?.label
-    : (map[labelIn] || 'None Detected');
+    : (tacticMap[labelIn] || 'None Detected');
 
-  // receipts 2..4
+  // receipts: ensure 2..4 strings
   let receipts = arr(json?.receipts).map(String).filter(Boolean);
   if (receipts.length < 2) {
     const hints = [String(json?.headline || ''), String(json?.core_take || '')].filter(Boolean);
     for (const h of hints) { if (receipts.length < 2 && h) receipts.push(h.slice(0,120)); }
   }
   receipts = receipts.slice(0, 4);
+
+  // suggested_reply.style: coerce to allowed enum
+  const allowedStyles = ['clipped','one_liner','reverse_uno','screenshot_bait','monologue'] as const;
+  const styleMap: Record<string, typeof allowedStyles[number]> = {
+    'one-liner':'one_liner',
+    'one liner':'one_liner',
+    'reverse uno':'reverse_uno',
+    'screenshot bait':'screenshot_bait',
+    'long':'monologue',
+    'longform':'monologue',
+    'paragraph':'monologue',
+    'boundary':'monologue',
+    'savage':'clipped',   // tone words → pick a valid style
+    'soft':'clipped',
+    'clinical':'clipped'
+  };
+  const styleInRaw = json?.suggested_reply?.style;
+  const styleIn = lower(typeof styleInRaw === 'string' ? styleInRaw : '');
+  const styleFromMap = styleMap[styleIn];
+  const tab = String(expectedCtx.tab || 'scan');
+  const defaultStyle: typeof allowedStyles[number] =
+    tab === 'pattern' ? 'monologue' : (tab === 'comeback' ? 'one_liner' : 'clipped');
+  const style = (allowedStyles as readonly string[]).includes(styleInRaw) ? styleInRaw
+    : (styleFromMap || defaultStyle);
 
   return {
     context: typeof json?.context === 'object'
@@ -128,33 +163,46 @@ function normalize(json: any, expectedCtx: any) {
           tab: json.context.tab ?? expectedCtx.tab
         }
       : expectedCtx,
+
     headline: String(json?.headline ?? '').slice(0,120),
     core_take: String(json?.core_take ?? '').slice(0,500),
-    tactic: { label: mappedLabel, confidence: Math.round(clamp01(json?.tactic?.confidence)*100) },
+
+    tactic: {
+      label: tacticLabel,
+      confidence: Math.round(clamp01(json?.tactic?.confidence)*100)
+    },
+
     motives: Array.isArray(json?.motives) ? json.motives.join('; ').slice(0,200) : String(json?.motives ?? '').slice(0,200),
     targeting: Array.isArray(json?.targeting) ? json.targeting.join('; ').slice(0,120) : String(json?.targeting ?? '').slice(0,120),
     power_play: String(json?.power_play ?? '').slice(0,120),
+
     receipts,
+
     next_moves: Array.isArray(json?.next_moves) ? json.next_moves.join(' · ').slice(0,120) : String(json?.next_moves ?? '').slice(0,120),
+
     suggested_reply: {
-      style: (json?.suggested_reply?.style ?? 'clipped'),
+      style,
       text: String(json?.suggested_reply?.text ?? '').slice(0,300)
     },
+
     safety: {
       risk_level: ['LOW','MODERATE','HIGH','CRITICAL'].includes(upper(json?.safety?.risk_level))
         ? upper(json?.safety?.risk_level)
         : 'LOW',
       notes: String(json?.safety?.notes ?? '').slice(0,200)
     },
+
     metrics: {
       red_flag: Math.round(clamp01(json?.metrics?.red_flag)*100),
       certainty: Math.round(clamp01(json?.metrics?.certainty ?? 0.6)*100),
       viral_potential: Math.round(clamp01(json?.metrics?.viral_potential)*100)
     },
+
     pattern: {
       cycle: json?.pattern?.cycle == null ? null : String(json?.pattern?.cycle).slice(0,200),
       prognosis: json?.pattern?.prognosis == null ? null : String(json?.pattern?.prognosis).slice(0,200)
     },
+
     ambiguity: {
       warning: json?.ambiguity?.warning == null ? null : String(json?.ambiguity?.warning).slice(0,200),
       missing_evidence: arr(json?.ambiguity?.missing_evidence).map(String)
@@ -162,6 +210,9 @@ function normalize(json: any, expectedCtx: any) {
   };
 }
 
+// ————————————————————————————————————————————————
+// Main entry
+// ————————————————————————————————————————————————
 export async function generateWhisperfire(system: string, user: string, tab?: string) {
   if (!canCall()) throw new Error('Circuit open: upstream unstable');
   if (!openai && !deepseek) {
@@ -197,11 +248,13 @@ export async function generateWhisperfire(system: string, user: string, tab?: st
     } else if (!forceGPT && deepseek) {
       return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
     }
+
     if (forceGPT && deepseek) {
       return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
     } else if (!forceGPT && openai) {
       return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
     }
+
     throw new Error('No available models for the requested configuration');
   } catch (primaryError) {
     try {
@@ -219,4 +272,5 @@ export async function generateWhisperfire(system: string, user: string, tab?: st
     }
   }
 }
+
 
