@@ -40,15 +40,17 @@ const Env = z.object({
   CB_RESET_MS: z.coerce.number().default(30000)
 });
 
+// Parse environment variables
+let parsedConfig: z.infer<typeof Env>;
 try {
-  export const cfg = Env.parse(process.env);
+  parsedConfig = Env.parse(process.env);
   console.log('✅ Config validation successful');
   
   // Check if required API keys are missing
-  if (!cfg.OPENAI_API_KEY) {
+  if (!parsedConfig.OPENAI_API_KEY) {
     console.warn('⚠️  WARNING: OPENAI_API_KEY is not set');
   }
-  if (!cfg.DEEPSEEK_API_KEY) {
+  if (!parsedConfig.DEEPSEEK_API_KEY) {
     console.warn('⚠️  WARNING: DEEPSEEK_API_KEY is not set');
   }
   
@@ -64,4 +66,7 @@ try {
   
   // Exit with error code so Railway knows the deployment failed
   process.exit(1);
-} 
+}
+
+// Export the parsed config
+export const cfg = parsedConfig; 
