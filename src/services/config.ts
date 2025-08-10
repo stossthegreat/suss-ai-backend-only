@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+// Debug: Log environment variables (without sensitive data)
+console.log('🔍 Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('OPENAI_API_KEY length:', process.env.OPENAI_API_KEY?.length || 'NOT SET');
+console.log('DEEPSEEK_API_KEY length:', process.env.DEEPSEEK_API_KEY?.length || 'NOT SET');
+console.log('API_KEY length:', process.env.API_KEY?.length || 'NOT SET');
+
 const Env = z.object({
   NODE_ENV: z.enum(['development','production','test']).default('production'),
   PORT: z.coerce.number().default(8080),
@@ -28,4 +36,19 @@ const Env = z.object({
   CB_RESET_MS: z.coerce.number().default(30000)
 });
 
-export const cfg = Env.parse(process.env); 
+try {
+  export const cfg = Env.parse(process.env);
+  console.log('✅ Config validation successful');
+} catch (error) {
+  console.error('❌ Config validation failed:', error);
+  console.error('Environment variables that failed validation:');
+  
+  if (error instanceof z.ZodError) {
+    error.errors.forEach(err => {
+      console.error(`  - ${err.path.join('.')}: ${err.message}`);
+    });
+  }
+  
+  // Exit with error code so Railway knows the deployment failed
+  process.exit(1);
+} 
