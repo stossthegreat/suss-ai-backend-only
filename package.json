@@ -1,13 +1,11 @@
 {
   "name": "whisperfire-backend",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "rm -rf dist && tsc",
-    "postbuild": "mkdir -p dist && cp -r src/* dist/",
-    "prestart": "npm run build",
     "start": "node dist/server.js",
     "lint": "eslint .",
     "test": "vitest run",
@@ -38,3 +36,4 @@
     "vitest": "^1.5.3"
   }
 }
+
