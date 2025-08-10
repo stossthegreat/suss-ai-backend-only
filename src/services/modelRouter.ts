@@ -20,9 +20,7 @@ const deepseek = togetherKey
   ? new OpenAI({ apiKey: togetherKey, baseURL: 'https://api.together.ai/v1' })
   : null;
 
-type ChatArgs = { system: string; user: string; model: string };
-
-async function callLLM(client: OpenAI, { system, user, model }: ChatArgs) {
+async function callLLM(client, { system, user, model }) {
   try {
     const res = await client.chat.completions.create({
       model,
@@ -36,26 +34,24 @@ async function callLLM(client: OpenAI, { system, user, model }: ChatArgs) {
       ]
     });
     return res.choices[0]?.message?.content ?? '';
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`LLM call failed: ${error?.message ?? 'Unknown error'}`);
   }
 }
 
-function safeJSON(str: string) {
+function safeJSON(str) {
   if (!str || typeof str !== 'string') return null;
-  const trimmed = str.trim();
-  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-    try { return JSON.parse(trimmed); } catch {}
+  const t = str.trim();
+  if (t.startsWith('{') && t.endsWith('}')) {
+    try { return JSON.parse(t); } catch {}
   }
-  const jsonMatch = str.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-  if (jsonMatch) {
-    try { return JSON.parse(jsonMatch[1]); } catch {}
-  }
+  const m = str.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+  if (m) { try { return JSON.parse(m[1]); } catch {} }
   try { return JSON.parse(str); } catch { return null; }
 }
 
-// Extract context from the user prompt (supports both old "TAB:" lines and new "CONTEXT: {...}")
-function extractContextFromUser(user: string) {
+// Extract context from user prompt (supports old header & new CONTEXT JSON)
+function extractContextFromUser(user) {
   try {
     const m = user.match(/CONTEXT:\s*(\{[\s\S]*?\})/);
     if (m) {
@@ -69,36 +65,38 @@ function extractContextFromUser(user: string) {
       };
     }
   } catch {}
-  // Fallback: parse legacy header lines
-  const pick = (label: string, def: string|null) => {
+  const pick = (label, def) => {
     const re = new RegExp(`^${label}:\\s*(.+)$`, 'mi');
     const mm = user.match(re);
-    return (mm?.[1] ?? def) as any;
+    return (mm?.[1] ?? def);
   };
   return {
     tab: pick('TAB', 'scan'),
     relationship: pick('RELATIONSHIP', 'Partner'),
     tone: pick('TONE', 'clinical'),
     content_type: pick('CONTENT_TYPE', 'dm'),
-    subject_name: pick('SUBJECT_NAME', null) === 'null' ? null : pick('SUBJECT_NAME', null)
+    subject_name: (() => {
+      const v = pick('SUBJECT_NAME', null);
+      return v === 'null' ? null : v;
+    })()
   };
 }
 
 // Map/normalize all drift to strict schema before validating
-function normalize(json: any, expectedCtx: any) {
-  const upper = (s?: string) => (s || '').toUpperCase();
-  const clamp01 = (n: any) => {
+function normalize(json, expectedCtx) {
+  const upper = s => (s || '').toUpperCase();
+  const clamp01 = n => {
     const v = typeof n === 'boolean' ? (n ? 1 : 0) : Number(n ?? 0);
-    return Math.max(0, Math.min(1, isFinite(v) ? v : 0));
+    return Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0));
   };
-  const arr = (v: any) => v == null ? [] : Array.isArray(v) ? v : [v];
+  const arr = v => (v == null ? [] : Array.isArray(v) ? v : [v]);
 
   const allowed = [
     'Gaslighting','Guilt Tripping','Deflection','DARVO','Passive Aggression',
     'Love Bombing','Breadcrumbing','Shaming','Silent Treatment','Control Test',
     'Triangulation','Emotional Baiting','Future Faking','Hoovering','None Detected'
   ];
-  const map: Record<string,string> = {
+  const map = {
     'appeasement':'None Detected',
     'accountability':'None Detected',
     'apology':'None Detected',
@@ -120,6 +118,11 @@ function normalize(json: any, expectedCtx: any) {
   }
   receipts = receipts.slice(0, 4);
 
+  // suggested_reply.style guard
+  const srStyle = String(json?.suggested_reply?.style ?? 'clipped');
+  const styleAllowed = ['clipped','one_liner','reverse_uno','screenshot_bait','monologue'];
+  const safeStyle = styleAllowed.includes(srStyle) ? srStyle : 'clipped';
+
   return {
     context: typeof json?.context === 'object'
       ? {
@@ -139,7 +142,7 @@ function normalize(json: any, expectedCtx: any) {
     receipts,
     next_moves: Array.isArray(json?.next_moves) ? json.next_moves.join(' · ').slice(0,120) : String(json?.next_moves ?? '').slice(0,120),
     suggested_reply: {
-      style: (json?.suggested_reply?.style ?? 'clipped'),
+      style: safeStyle,
       text: String(json?.suggested_reply?.text ?? '').slice(0,300)
     },
     safety: {
@@ -164,57 +167,43 @@ function normalize(json: any, expectedCtx: any) {
   };
 }
 
-export async function generateWhisperfire(system: string, user: string, tab?: string) {
+export async function generateWhisperfire(system, user, tab) {
   if (!canCall()) throw new Error('Circuit open: upstream unstable');
-
   if (!openai && !deepseek) {
     throw new Error('No API keys configured. Set OPENAI_API_KEY and/or TOGETHER_API_KEY (or DEEPSEEK_API_KEY).');
   }
 
   const expectedCtx = extractContextFromUser(user);
 
-  const tryModel = async (client: OpenAI, model: string, label: string) => {
+  const tryModel = async (client, model, label) => {
     const raw = await retry(() => callLLM(client, { system, user, model }), 1, 200);
     const json = safeJSON(raw);
     if (!json) {
       modelCalls.inc({ model: label, result: 'no_json' });
       throw new Error(`${label} returned invalid JSON format`);
     }
-
     const coerced = normalize(json, expectedCtx);
     const parsed = WhisperfireSchema.safeParse(coerced);
     const ok = parsed.success;
-
     modelCalls.inc({ model: label, result: ok ? 'ok' : 'bad_schema' });
-    if (!ok) {
-      throw new Error(`${label} schema validation failed: ${parsed.error?.message ?? 'Unknown error'}`);
-    }
+    if (!ok) throw new Error(`${label} schema validation failed: ${parsed.error?.message ?? 'Unknown error'}`);
     return parsed.data;
   };
 
   const forceGPT = tab && flags.forceGPTFor(tab);
 
   try {
-    if (forceGPT && openai) {
-      return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
-    } else if (!forceGPT && deepseek) {
-      return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
-    }
+    if (forceGPT && openai) return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
+    if (!forceGPT && deepseek) return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
 
-    if (forceGPT && deepseek) {
-      return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
-    } else if (!forceGPT && openai) {
-      return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
-    }
+    if (forceGPT && deepseek) return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
+    if (!forceGPT && openai) return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
 
     throw new Error('No available models for the requested configuration');
   } catch (primaryError) {
     try {
-      if (forceGPT && deepseek) {
-        return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
-      } else if (!forceGPT && openai) {
-        return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
-      }
+      if (forceGPT && deepseek) return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
+      if (!forceGPT && openai) return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
       throw new Error('No fallback models available');
     } catch (fallbackError) {
       recordFailure();
@@ -223,4 +212,4 @@ export async function generateWhisperfire(system: string, user: string, tab?: st
       throw new Error(`All models failed. Primary: ${primaryMsg}, Fallback: ${fallbackMsg}`);
     }
   }
-                   }
+}
