@@ -35,12 +35,12 @@ STRICT OUTPUT
 `;
 
 export function buildUserPrompt(
-  tab,
-  relationship,
-  tone,
-  contentType,
-  subjectName,
-  input
+  tab: 'scan'|'comeback'|'pattern',
+  relationship: string,
+  tone: 'savage'|'soft'|'clinical',
+  contentType: 'dm'|'bio'|'story'|'post',
+  subjectName: string | null,
+  input: { message?: string; messages?: string[] }
 ) {
   const context = {
     tab,
