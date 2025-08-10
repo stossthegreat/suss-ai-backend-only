@@ -1,11 +1,12 @@
 {
   "name": "whisperfire-backend",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
+    "postbuild": "mkdir -p dist && cp -r src/* dist/",
     "prestart": "npm run build",
     "start": "node dist/server.js",
     "lint": "eslint .",
