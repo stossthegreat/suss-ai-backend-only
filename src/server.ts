@@ -21,19 +21,24 @@ initSentry();
 const app = express();
 if (cfg.SENTRY_DSN) app.use(Sentry.Handlers.requestHandler());
 
-// IMPORTANT: running behind Railway’s proxy
+// IMPORTANT for Railway/proxies so express-rate-limit sees real IPs
 app.set('trust proxy', 1);
 
+// Core middleware
 app.use(requestId);
 app.use(security);
 app.use(noSniff);
 app.use(morgan('tiny'));
+
+// Rate limiting (after trust proxy)
 app.use(limiter);
 app.use(perKeyLimiter);
 
-// Body + JSON
-app.use(express.json({ limit: '1mb' }));
+// NOTE: Stripe webhook would need raw body; mount it before this if you add it.
+app.use(express.json({ limit: '1mb' })); // after any raw-body routes
 app.use(jsonEnforcer);
+
+// Auth (no-op if API_KEY not set)
 app.use(requireApiKey);
 
 // Routes
@@ -48,7 +53,15 @@ app.use('/api/v1', analyzeRouter);
 if (cfg.SENTRY_DSN) app.use(Sentry.Handlers.errorHandler());
 app.use(errorHandler);
 
-const server = app.listen(cfg.PORT, () => console.log(`Whisperfire listening on ${cfg.PORT}`));
+// Start
+const server = app.listen(cfg.PORT, () => {
+  console.log(`Whisperfire listening on ${cfg.PORT}`);
+});
+
+// Graceful shutdown
 process.on('SIGTERM', () => server.close());
 process.on('SIGINT', () => server.close());
+
+export default app;
+
 
