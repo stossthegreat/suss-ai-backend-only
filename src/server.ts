@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
+import cors from 'cors';
+
 import analyzeRouter from './routes/analyze.js';
 import healthRouter from './routes/health.js';
 import docsRouter from './routes/docs.js';
 import metricsRouter from './routes/metrics.js';
 import adminRouter from './routes/admin.js';
+
 import { limiter } from './middleware/rateLimit.js';
 import { perKeyLimiter } from './middleware/perKeyRateLimit.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -19,26 +22,35 @@ import { cfg } from './services/config.js';
 initSentry();
 
 const app = express();
+
+/** IMPORTANT: behind Railway’s proxy, enable this BEFORE any rate limiters */
+app.set('trust proxy', 1);
+console.log('trust proxy:', app.get('trust proxy'));
+
 if (cfg.SENTRY_DSN) app.use(Sentry.Handlers.requestHandler());
 
-// IMPORTANT for Railway/proxies so express-rate-limit sees real IPs
-app.set('trust proxy', 1);
-
-// Core middleware
 app.use(requestId);
 app.use(security);
 app.use(noSniff);
 app.use(morgan('tiny'));
 
-// Rate limiting (after trust proxy)
+// CORS
+if (cfg.CORS_ORIGINS) {
+  const origins = cfg.CORS_ORIGINS.split(',').map(s => s.trim());
+  app.use(cors({ origin: origins, credentials: true }));
+} else {
+  app.use(cors());
+}
+
+// Rate-limiters (after trust proxy)
 app.use(limiter);
 app.use(perKeyLimiter);
 
-// NOTE: Stripe webhook would need raw body; mount it before this if you add it.
-app.use(express.json({ limit: '1mb' })); // after any raw-body routes
+// JSON body
+app.use(express.json({ limit: '1mb' }));
 app.use(jsonEnforcer);
 
-// Auth (no-op if API_KEY not set)
+// Auth
 app.use(requireApiKey);
 
 // Routes
@@ -53,15 +65,10 @@ app.use('/api/v1', analyzeRouter);
 if (cfg.SENTRY_DSN) app.use(Sentry.Handlers.errorHandler());
 app.use(errorHandler);
 
-// Start
-const server = app.listen(cfg.PORT, () => {
-  console.log(`Whisperfire listening on ${cfg.PORT}`);
-});
-
-// Graceful shutdown
+const server = app.listen(cfg.PORT, () =>
+  console.log(`Whisperfire listening on ${cfg.PORT}`)
+);
 process.on('SIGTERM', () => server.close());
 process.on('SIGINT', () => server.close());
-
-export default app;
 
 
