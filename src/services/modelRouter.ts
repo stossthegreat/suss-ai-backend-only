@@ -6,11 +6,20 @@ import { modelCalls } from './metrics.js';
 import { flags } from './flags.js';
 import { cfg } from './config.js';
 
-const openai = new OpenAI({ apiKey: cfg.OPENAI_API_KEY });
-const deepseek = new OpenAI({ 
+// Check if API keys are available
+if (!cfg.OPENAI_API_KEY) {
+  console.warn('⚠️  OpenAI client will not be available - OPENAI_API_KEY is missing');
+}
+if (!cfg.DEEPSEEK_API_KEY) {
+  console.warn('⚠️  DeepSeek client will not be available - DEEPSEEK_API_KEY is missing');
+}
+
+// Only create clients if API keys are available
+const openai = cfg.OPENAI_API_KEY ? new OpenAI({ apiKey: cfg.OPENAI_API_KEY }) : null;
+const deepseek = cfg.DEEPSEEK_API_KEY ? new OpenAI({ 
   apiKey: cfg.DEEPSEEK_API_KEY, 
   baseURL: 'https://api.together.xyz/v1' 
-});
+}) : null;
 
 type ChatArgs = { system: string; user: string; model: string };
 
@@ -54,6 +63,11 @@ function safeJSON(str: string) {
 export async function generateWhisperfire(system: string, user: string, tab?: string) {
   if (!canCall()) throw new Error('Circuit open: upstream unstable');
 
+  // Check if we have any available clients
+  if (!openai && !deepseek) {
+    throw new Error('No API keys configured. Please set OPENAI_API_KEY and/or DEEPSEEK_API_KEY environment variables.');
+  }
+
   const tryModel = async (client: OpenAI, model: string, label: string) => {
     const raw = await retry(() => callLLM(client, { system, user, model }), 1, 200);
     const json = safeJSON(raw);
@@ -78,18 +92,33 @@ export async function generateWhisperfire(system: string, user: string, tab?: st
   const forceGPT = tab && flags.forceGPTFor(tab);
   
   try {
-    const primary = forceGPT 
-      ? await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4')
-      : await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
-    recordSuccess(); 
-    return primary;
+    // Try primary model first
+    if (forceGPT && openai) {
+      return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
+    } else if (!forceGPT && deepseek) {
+      return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
+    }
+    
+    // If primary not available, try fallback
+    if (forceGPT && deepseek) {
+      return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
+    } else if (!forceGPT && openai) {
+      return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
+    }
+    
+    throw new Error('No available models for the requested configuration');
+    
   } catch (primaryError) {
     try {
-      const fallback = forceGPT 
-        ? await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek')
-        : await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
-      recordSuccess(); 
-      return fallback;
+      // Try fallback model
+      if (forceGPT && deepseek) {
+        return await tryModel(deepseek, cfg.PRIMARY_MODEL, 'deepseek');
+      } else if (!forceGPT && openai) {
+        return await tryModel(openai, cfg.FALLBACK_MODEL, 'gpt4');
+      }
+      
+      throw new Error('No fallback models available');
+      
     } catch (fallbackError) {
       recordFailure(); 
       const primaryMsg = primaryError instanceof Error ? primaryError.message : 'Unknown error';
