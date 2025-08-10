@@ -1,29 +1,21 @@
 import { Router } from 'express';
 import { cfg } from '../services/config.js';
-import { WhisperfireSchema } from '../services/schema.js';
 
-const router = Router();
+const r = Router();
 
-router.get('/health', (_req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    env: cfg.NODE_ENV,
-    model: cfg.PRIMARY_MODEL
+r.get('/health', (_req, res) => {
+  res.json({
+    ok: true,
+    provider: {
+      openai: !!cfg.OPENAI_API_KEY,
+      together: !!(cfg.TOGETHER_API_KEY || cfg.DEEPSEEK_API_KEY)
+    },
+    models: {
+      primary: cfg.PRIMARY_MODEL,
+      fallback: cfg.FALLBACK_MODEL
+    },
+    build: process.env.RAILWAY_GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'local'
   });
 });
 
-router.get('/version', (_req, res) => {
-  res.json({ 
-    name: 'Whisperfire API', 
-    version: '1.0.0',
-    description: 'Real-time psychological insight engine'
-  });
-});
-
-router.get('/schema', (_req, res) => {
-  res.json(JSON.parse(WhisperfireSchema.toString())); // lightweight peek; not full zod JSON schema
-});
-
-export default router; 
+export default r;
