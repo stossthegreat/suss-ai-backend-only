@@ -21,6 +21,9 @@ initSentry();
 const app = express();
 if (cfg.SENTRY_DSN) app.use(Sentry.Handlers.requestHandler());
 
+// Running behind Railway proxy → needed for express-rate-limit
+app.set('trust proxy', 1);
+
 app.use(requestId);
 app.use(security);
 app.use(noSniff);
@@ -28,9 +31,8 @@ app.use(morgan('tiny'));
 app.use(limiter);
 app.use(perKeyLimiter);
 
-// NOTE: Stripe webhook requires raw body; mount it separately if needed
-
-app.use(express.json({ limit: '1mb' })); // after stripe hook
+// NOTE: Stripe webhook would go before this with raw body if used
+app.use(express.json({ limit: '1mb' }));
 app.use(jsonEnforcer);
 app.use(requireApiKey);
 
@@ -46,4 +48,4 @@ app.use(errorHandler);
 
 const server = app.listen(cfg.PORT, () => console.log(`Whisperfire listening on ${cfg.PORT}`));
 process.on('SIGTERM', () => server.close());
-process.on('SIGINT', () => server.close()); 
+process.on('SIGINT', () => server.close());
