@@ -8,6 +8,8 @@ export const WhisperfireSchema = z.object({
     subject_name: z.string().nullable(),
     tab: z.enum(['scan','comeback','pattern'])
   }),
+
+  // Core cards (unchanged)
   headline: z.string().max(120),
   core_take: z.string().max(500),
   tactic: z.object({
@@ -43,7 +45,22 @@ export const WhisperfireSchema = z.object({
   ambiguity: z.object({
     warning: z.string().max(200).nullable(),
     missing_evidence: z.array(z.string()).optional()
-  })
+  }),
+
+  // ——— NEW OPTIONAL FIELDS (for your upgraded cards) ———
+  hidden_agenda: z.string().max(200).optional(),         // e.g. “Endgame: reshape your instincts…”
+  archetypes: z.array(z.object({
+    label: z.string().max(40),                           // e.g. "Charm-to-Chokehold"
+    weight: z.number().min(0).max(100)                   // contribution %
+  })).max(3).optional(),
+  contradictions: z.array(z.string()).max(4).optional(), // e.g. “Says ‘I hate drama’ → creates chaos”
+  weapons: z.array(z.string()).max(5).optional(),        // e.g. “Guilt Bombs”, “Mirror Baiting”
+  forecast: z.array(z.object({
+    window: z.string().max(40),                          // "72h", "5–7 days"
+    event: z.string().max(120),                          // "Sweet outreach", "Cold withdrawal"
+    likelihood: z.number().min(0).max(100)
+  })).max(4).optional(),
+  long_game: z.string().max(200).optional()              // “They’re methodically calibrating you…”
 });
 
-export type WhisperfireOutput = z.infer<typeof WhisperfireSchema>; 
+export type WhisperfireOutput = z.infer<typeof WhisperfireSchema>;
