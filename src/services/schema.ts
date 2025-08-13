@@ -9,9 +9,9 @@ export const WhisperfireSchema = z.object({
     tab: z.enum(['scan','comeback','pattern'])
   }),
 
-  // Core (works for all tabs)
+  // Core fields (used across tabs)
   headline: z.string().max(120),
-  core_take: z.string().max(500), // "The Read" / Hidden Agenda Scan
+  core_take: z.string().max(500),  // "The Read" or Hidden Agenda Scan
   tactic: z.object({
     label: z.enum([
       'Gaslighting','Guilt Tripping','Deflection','DARVO','Passive Aggression',
@@ -20,34 +20,40 @@ export const WhisperfireSchema = z.object({
     ]),
     confidence: z.number().min(0).max(100)
   }),
-  motives: z.string().max(200),      // "Long Game Warning" / endgame
+  motives: z.string().max(200),          // Long Game Warning / endgame
   targeting: z.string().max(120),
   power_play: z.string().max(120),
   receipts: z.array(z.string()).min(2).max(4),
   next_moves: z.string().max(120),
+
   suggested_reply: z.object({
+    // NOTE: comeback requires multi-line text (Roast / Savage Alt / Ice-Cold)
     style: z.enum(['clipped','one_liner','reverse_uno','screenshot_bait','monologue']),
     text: z.string().max(300)
   }),
+
   safety: z.object({
     risk_level: z.enum(['LOW','MODERATE','HIGH','CRITICAL']),
     notes: z.string().max(200)
   }),
+
   metrics: z.object({
     red_flag: z.number().min(0).max(100),
     certainty: z.number().min(0).max(100),
     viral_potential: z.number().min(0).max(100)
   }),
+
   pattern: z.object({
     cycle: z.string().max(200).nullable(),
     prognosis: z.string().max(200).nullable()
   }),
+
   ambiguity: z.object({
     warning: z.string().max(200).nullable(),
     missing_evidence: z.array(z.string()).optional()
   }),
 
-  // Pattern God‑mode (OPTIONAL)
+  // ——— Pattern God‑Mode (OPTIONAL enrichers for your new cards) ———
   hidden_agenda: z.string().max(200).optional(),
   archetypes: z.array(z.object({
     label: z.string().max(40),
